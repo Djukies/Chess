@@ -34,25 +34,58 @@ bool GameLogic::tryMove(uint8_t oldPos, uint8_t newPos) {
     return false;
 }
 
+void GameLogic::setOpponentControlledSquares() {
+    board->opponentSquares = 0;
+    std::map<integer, std::vector<Move>> possibleMoves;
+    bit_board pieces;
+    if (board->activeTeam == TEAMWHITE) {
+        pieces = board->whitePieces;
+    }
+    else {
+        pieces = board->blackPieces;
+    }
 
-
+    while (pieces) {
+        integer i = __builtin_ctzll(pieces); // Find index of the least significant set bit
+        bit_board mask = 1ULL << i;
+        if (mask & board->pawns) {
+            if (board->activeTeam == TEAMWHITE) {
+                possibleMoves[i].push_back({board->enPassantSquare, CAPTURE, i, (integer) (i + 7), PAWN, board->activeTeam});
+                possibleMoves[i].push_back({board->enPassantSquare, CAPTURE, i, (integer) (i + 9), PAWN, board->activeTeam});
+            } else {
+                possibleMoves[i].push_back({board->enPassantSquare, CAPTURE, i, (integer) (i - 7), PAWN, board->activeTeam});
+                possibleMoves[i].push_back({board->enPassantSquare, CAPTURE, i, (integer) (i - 9), PAWN, board->activeTeam});
+            }
+        } else if (mask & board->bishops) {
+            possibleMoves[i] = calculateSlidingPieceMoves(i, {-9, -7, 7, 9});
+        } else if (mask & board->knights) {
+            possibleMoves[i] = calculateKnightMoves(i);
+        } else if (mask & board->rooks) {
+            possibleMoves[i] = calculateSlidingPieceMoves(i, {-8, -1, 1, 8});
+        } else if (mask & board->queens) {
+            possibleMoves[i] = calculateSlidingPieceMoves(i, {-9, -8, -7, -1, 1, 7, 8, 9});
+        } else if (mask & board->kings) {
+            possibleMoves[i] = calculateKingMoves(i, false);
+        }
+        pieces &= pieces - 1;
+    }
+    for (const auto &[fst, moveList]: possibleMoves) {
+        for (Move opponentMove: moveList) {
+            board->opponentSquares |= 1ULL << opponentMove.newPos;
+        }
+    }
+}
 
 std::map<integer, std::vector<Move>> GameLogic::calculateMoves(bool onlyLegalMoves) {
     bit_board pieces;
     std::map<integer, std::vector<Move>> possibleMoves;
     if (onlyLegalMoves) {
-        board->opponentSquares = 0;
         board->activeTeam = !board->activeTeam;
-        for (const auto &[fst, moveList]: calculateMoves(false)) {
-            for (Move opponentMove: moveList) {
-                board->opponentSquares |= 1ULL << opponentMove.newPos;
-            }
-        }
+        this->setOpponentControlledSquares();
         board->activeTeam = !board->activeTeam;
     }
     if (board->activeTeam == TEAMWHITE) {
         pieces = board->whitePieces;
-
     }
     else {
         pieces = board->blackPieces;
@@ -79,7 +112,7 @@ std::map<integer, std::vector<Move>> GameLogic::calculateMoves(bool onlyLegalMov
             for (Move move: pieceMoves) {
                 if (mask & board->kings) {
                     if (move.move_type == NORMAL_MOVE) {
-                        continue;
+                        //continue;
                     }
                 }
                 else if (!((1ULL << move.oldPos) & board->opponentSquares)) {
