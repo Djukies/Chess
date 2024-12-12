@@ -175,7 +175,7 @@ int main() {
     SetTargetFPS(60);
     SetTraceLogLevel(LOG_ERROR);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(800, 600, "Chess 2-Player by Djukies");
+    InitWindow(800, 800, "Chess 2-Player by Djukies");
 
     SetWindowMinSize(300, 300);
 
@@ -186,7 +186,7 @@ int main() {
     auto* debug = new Debug(renderer, board);
 
     gameLogic->moves = gameLogic->calculateMoves();
-    const int depth = 5;
+    const int depth = 0;
     for (int checkDepth = 0; checkDepth <= depth; checkDepth++) {
         moveCount = 0;
         captures = 0;

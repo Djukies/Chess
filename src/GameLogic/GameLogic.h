@@ -30,6 +30,7 @@ private:
     std::vector<Move> calculateKnightMoves(integer piece);
     std::vector<Move> calculateKingMoves(integer piece, bool onlyLegalMoves);
     std::vector<Move> calculateSlidingPieceMoves(integer piece, std::vector<int8_t> dirs);
+    void setOpponentControlledSquares();
     int firstMadMove = board->fullMoves;
 
 

@@ -4,7 +4,7 @@
 Renderer::Renderer(Board* board, GameLogic* gameLogic) : board(board), gameLogic(gameLogic) {}
 
 void Renderer::render() {
-    ClearBackground(BLUE);
+    ClearBackground(BLACK);
     squareSize = std::min(GetScreenHeight(), GetScreenWidth()) / 8;
 
 
