@@ -28,7 +28,7 @@ private:
 
     std::vector<Move> calculatePawnMoves(integer piece);
     std::vector<Move> calculateKnightMoves(integer piece);
-    std::vector<Move> calculateKingMoves(integer piece);
+    std::vector<Move> calculateKingMoves(integer piece, bool onlyLegalMoves);
     std::vector<Move> calculateSlidingPieceMoves(integer piece, std::vector<int8_t> dirs);
     int firstMadMove = board->fullMoves;
 
@@ -40,7 +40,7 @@ public:
 
     std::vector<Move> madeMoves = {};
     std::map<integer, std::vector<Move>> moves = calculateMoves();
-    std::map<integer, std::vector<Move>> calculateMoves(bool recursion = false);
+    std::map<integer, std::vector<Move>> calculateMoves(bool onlyLegalMoves = true);
 };
 
 

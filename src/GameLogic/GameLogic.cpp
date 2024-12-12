@@ -27,6 +27,7 @@ bool GameLogic::tryMove(uint8_t oldPos, uint8_t newPos) {
         while (board->fullMoves - firstMadMove <= madeMoves.size()) {
             madeMoves.pop_back();
         }
+        this->moves = this->calculateMoves();
         madeMoves.push_back(move);
         return true;
     } // Else
@@ -36,11 +37,26 @@ bool GameLogic::tryMove(uint8_t oldPos, uint8_t newPos) {
 
 
 
-std::map<integer, std::vector<Move>> GameLogic::calculateMoves(bool recursion) {
+std::map<integer, std::vector<Move>> GameLogic::calculateMoves(bool onlyLegalMoves) {
     bit_board pieces;
     std::map<integer, std::vector<Move>> possibleMoves;
-    if (board->activeTeam == TEAMWHITE) pieces = board->whitePieces;
-    else pieces = board->blackPieces;
+    if (onlyLegalMoves) {
+        board->opponentSquares = 0;
+        board->activeTeam = !board->activeTeam;
+        for (const auto &[fst, moveList]: calculateMoves(false)) {
+            for (Move opponentMove: moveList) {
+                board->opponentSquares |= 1ULL << opponentMove.newPos;
+            }
+        }
+        board->activeTeam = !board->activeTeam;
+    }
+    if (board->activeTeam == TEAMWHITE) {
+        pieces = board->whitePieces;
+
+    }
+    else {
+        pieces = board->blackPieces;
+    }
 
     while (pieces) {
         integer i = __builtin_ctzll(pieces); // Find index of the least significant set bit
@@ -56,11 +72,27 @@ std::map<integer, std::vector<Move>> GameLogic::calculateMoves(bool recursion) {
         } else if (mask & board->queens) {
             possibleMoves[i] = calculateSlidingPieceMoves(i, {-9, -8, -7, -1, 1, 7, 8, 9});
         } else if (mask & board->kings) {
-            possibleMoves[i] = calculateKingMoves(i);
+            possibleMoves[i] = calculateKingMoves(i, onlyLegalMoves);
         }
-        if (!recursion) {
+        if (onlyLegalMoves) {
             std::vector<Move> pieceMoves = possibleMoves[i];
             for (Move move: pieceMoves) {
+                if (mask & board->kings) {
+                    if (move.move_type == NORMAL_MOVE) {
+                        continue;
+                    }
+                }
+                else if (!((1ULL << move.oldPos) & board->opponentSquares)) {
+                    if (board->activeTeam == TEAMWHITE) {
+                        if (!((1ULL << board->whiteKingPos) & board->opponentSquares)) {
+                            continue;
+                        }
+                    } else {
+                        if (!((1ULL << board->blackKingPos) & board->opponentSquares)) {
+                            continue;
+                        }
+                    }
+                }
                 makeMove(board, move);
                 bit_board pieceBitboard;
                 integer king;
@@ -71,7 +103,7 @@ std::map<integer, std::vector<Move>> GameLogic::calculateMoves(bool recursion) {
                     pieceBitboard = board->blackPieces;
                     king = board->whiteKingPos;
                 }
-                std::map<integer, std::vector<Move>> opponentMoves = calculateMoves(true);
+                std::map<integer, std::vector<Move>> opponentMoves = calculateMoves(false);
                 while (pieceBitboard) {
                     int index = __builtin_ctzll(pieceBitboard); // Find index of the least significant set bit
 
@@ -278,10 +310,9 @@ std::vector<Move> GameLogic::calculateKnightMoves(integer piece) {
     return pieceMoves;
 }
 
-std::vector<Move> GameLogic::calculateKingMoves(integer piece) {
+std::vector<Move> GameLogic::calculateKingMoves(integer piece, bool onlyLegalMoves) {
     std::vector<Move> pieceMoves;
     std::vector<int8_t> dirs = {-9, -8, -7, -1, 1, 7, 8, 9};
-
     for (int8_t dir : dirs) {
         if (!isValidKingMove(piece, dir)) {
             continue;
@@ -295,6 +326,11 @@ std::vector<Move> GameLogic::calculateKingMoves(integer piece) {
             if (pieceBitBoard & (board->whitePieces | board->blackPieces)) {
                 pieceMoves.push_back({board->enPassantSquare, CAPTURE, piece, (integer) (piece + dir), KING, board->activeTeam, (integer) (piece + dir), getPiece(board, (piece + dir))});
             } else {
+                if (onlyLegalMoves) {
+                    if (1ULL << (piece + dir) & board->opponentSquares) {
+                        continue;
+                    }
+                }
                 pieceMoves.push_back({board->enPassantSquare, NORMAL_MOVE, piece, (integer) (piece + dir)});
             }
         }

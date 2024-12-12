@@ -186,7 +186,7 @@ int main() {
     auto* debug = new Debug(renderer, board);
 
     gameLogic->moves = gameLogic->calculateMoves();
-    const int depth = 6;
+    const int depth = 5;
     for (int checkDepth = 0; checkDepth <= depth; checkDepth++) {
         moveCount = 0;
         captures = 0;
