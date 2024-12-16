@@ -85,12 +85,44 @@ std::map<integer, std::vector<Move>> GameLogic::calculateMoves(bool onlyLegalMov
         this->setOpponentControlledSquares();
         board->activeTeam = !board->activeTeam;
     }
+    int x;
+    int y = intToY(board->whiteKingPos);
     if (board->activeTeam == TEAMWHITE) {
         pieces = board->whitePieces;
+        x = intToX(board->whiteKingPos);
+        y = intToY(board->whiteKingPos);
     }
     else {
         pieces = board->blackPieces;
+        x = intToX(board->blackKingPos);
+        y = intToY(board->blackKingPos);
     }
+
+
+    bit_board kingY = (uint64_t )0xFF << (y*8);
+    bit_board kingX = 0x0101010101010101ULL << x;
+
+    bit_board leftSide = ((1ULL << x) - 1) * 0x0101010101010101ULL;
+    bit_board rightSide = ~(((1ULL << (x+1)) - 1) * 0x0101010101010101ULL);
+    bit_board upSide = y < 7 ? UINT64_MAX << (8 * (y+1)) : 0ULL;
+    bit_board downSide =  y > 0 ? UINT64_MAX >> (8 * (8 - y)) : 0ULL;
+
+    bit_board kingDiagonalTopLeft = x>y ? 0x8040201008040201 >> ((x-y)*8) : 0x8040201008040201 << ((y-x)*8);
+    bit_board kingDiagonalTopRight = (7-x) > y ? 0x0102040810204080 >> (((7-x)-y)*8) : 0x0102040810204080 << ((y-(7-x))*8);
+
+    bit_board left = kingY & leftSide;
+    bit_board right = kingY & rightSide;
+    bit_board up = kingX & upSide;
+    bit_board down = kingX & downSide;
+
+    bit_board topLeft = kingDiagonalTopLeft & leftSide;
+    bit_board topRight = kingDiagonalTopRight & rightSide;
+    bit_board bottomLeft = kingDiagonalTopRight & leftSide;
+    bit_board bottomRight = kingDiagonalTopLeft & rightSide;
+
+    bit_board straights = left | right | up | down;
+    bit_board diagonals = topLeft | topRight | bottomLeft | bottomRight;
+    bit_board allPinDirs = left | right | up | down | topLeft | topRight | bottomLeft | bottomRight;
 
     while (pieces) {
         integer i = __builtin_ctzll(pieces); // Find index of the least significant set bit
@@ -115,8 +147,7 @@ std::map<integer, std::vector<Move>> GameLogic::calculateMoves(bool onlyLegalMov
                     if (move.move_type == NORMAL_MOVE) {
                         //continue;
                     }
-                }
-                else if (!((1ULL << move.oldPos) & board->opponentSquares)) {
+                } else if (!((1ULL << move.oldPos) & allPinDirs) || !((1ULL << move.oldPos) & board->opponentSquares)) {
                     if (board->activeTeam == TEAMWHITE) {
                         if (!((1ULL << board->whiteKingPos) & board->opponentSquares)) {
                             continue;

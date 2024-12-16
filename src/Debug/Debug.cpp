@@ -39,14 +39,6 @@ void Debug::showBitBoards() {
     bit_board diagonals = topLeft | topRight | bottomLeft | bottomRight;
     bit_board all = left | right | up | down | topLeft | topRight | bottomLeft | bottomRight;
 
-    bit_board m = 0ULL;
-
-    int z = 7-x;
-    if (z >= y) {
-        m |= 0x0102040810204080 >> ((z - y) << 3);
-    } else {
-        m |= 0x0102040810204080 << ((y - z) << 3);
-    }
     this->bitBoards = {0ULL,
                        diagonals, straights, all,
                        board->whitePieces|board->blackPieces, board->whitePieces, board->blackPieces, board->pawns, board->knights, board->bishops, board->rooks, board->queens, board->kings};
