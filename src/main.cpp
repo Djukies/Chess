@@ -110,6 +110,7 @@ char xToChar(int x) {
 double moveCount = 0;
 int captures = 0;
 int enPassants = 0;
+int checkmates = 0;
 void MoveGenerationTest(Board* board, const int depth, GameLogic* gameLogic/*, std::vector<Move> moveList*/)
 {
 
@@ -179,14 +180,14 @@ int main() {
 
     SetWindowMinSize(300, 300);
 
-    std::string FEN = "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr w KQkq - 0 10";
+    std::string FEN = "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr w KQkq - 0 10";//RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr w KQkq - 0 10
     Board* board = loadBoardFromFEN(FEN);
     auto* gameLogic = new GameLogic(board);
     auto* renderer = new Renderer(board, gameLogic);
     auto* debug = new Debug(renderer, board);
 
     gameLogic->moves = gameLogic->calculateMoves();
-    const int depth = 0;
+    const int depth = 6;
     for (int checkDepth = 0; checkDepth <= depth; checkDepth++) {
         moveCount = 0;
         captures = 0;
