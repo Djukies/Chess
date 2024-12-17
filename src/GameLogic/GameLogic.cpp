@@ -81,9 +81,19 @@ std::map<integer, std::vector<Move>> GameLogic::calculateMoves(bool onlyLegalMov
     bit_board pieces;
     std::map<integer, std::vector<Move>> possibleMoves;
     if (onlyLegalMoves) {
+        if (board->activeTeam == TEAMWHITE) {
+            board->whitePieces &= ~(1ULL << board->whiteKingPos);
+        } else {
+            board->blackPieces &= ~(1ULL << board->blackKingPos);
+        }
         board->activeTeam = !board->activeTeam;
         this->setOpponentControlledSquares();
         board->activeTeam = !board->activeTeam;
+        if (board->activeTeam == TEAMWHITE) {
+            board->whitePieces |= 1ULL << board->whiteKingPos;
+        } else {
+            board->blackPieces |= 1ULL << board->blackKingPos;
+        }
     }
     int x;
     int y = intToY(board->whiteKingPos);
@@ -145,9 +155,9 @@ std::map<integer, std::vector<Move>> GameLogic::calculateMoves(bool onlyLegalMov
             for (Move move: pieceMoves) {
                 if (mask & board->kings) {
                     if (move.move_type == NORMAL_MOVE) {
-                        //continue;
+                        continue;
                     }
-                } else if (!((1ULL << move.oldPos) & allPinDirs) || !((1ULL << move.oldPos) & board->opponentSquares)) {
+                } else if (!((1ULL << move.oldPos) & (allPinDirs & board->opponentSquares))) {
                     if (board->activeTeam == TEAMWHITE) {
                         if (!((1ULL << board->whiteKingPos) & board->opponentSquares)) {
                             continue;
@@ -156,6 +166,17 @@ std::map<integer, std::vector<Move>> GameLogic::calculateMoves(bool onlyLegalMov
                         if (!((1ULL << board->blackKingPos) & board->opponentSquares)) {
                             continue;
                         }
+                    }
+                } else if ((1ULL << move.oldPos) & allPinDirs) {
+                    bit_board oldPosBitboard = 1ULL << move.oldPos;
+                    bit_board opponentDiagonalSliders = board->bishops | board->queens;
+                    bit_board opponentStraightSliders = board->rooks | board->queens;
+                    if (board->activeTeam == TEAMWHITE) {
+                        opponentDiagonalSliders &= board->blackPieces;
+                        opponentStraightSliders &= board->blackPieces;
+                    } else {
+                        opponentDiagonalSliders &= board->whitePieces;
+                        opponentStraightSliders &= board->whitePieces;
                     }
                 }
                 makeMove(board, move);
