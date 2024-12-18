@@ -1,4 +1,5 @@
 #include "GameLogic.h"
+#include "MoveGeneration/MoveGeneration.h"
 #include <iostream>
 
 GameLogic::GameLogic(Board *board) : board(board) {}
@@ -27,9 +28,10 @@ bool GameLogic::tryMove(uint8_t oldPos, uint8_t newPos) {
         while (board->fullMoves - firstMadMove <= madeMoves.size()) {
             madeMoves.pop_back();
         }
-        board->activeTeam = TEAMWHITE;
+        board->whiteToMove = TEAMWHITE;
         this->moves = this->calculateMoves();
         madeMoves.push_back(move);
+        calculateLegalMoves(board);
         return true;
     } // Else
     return false;
@@ -39,7 +41,7 @@ void GameLogic::setOpponentControlledSquares() {
     board->opponentSquares = 0;
     std::map<integer, std::vector<Move>> possibleMoves;
     bit_board pieces;
-    if (board->activeTeam == TEAMWHITE) {
+    if (board->whiteToMove == TEAMWHITE) {
         pieces = board->whitePieces;
     }
     else {
@@ -50,12 +52,12 @@ void GameLogic::setOpponentControlledSquares() {
         integer i = __builtin_ctzll(pieces); // Find index of the least significant set bit
         bit_board mask = 1ULL << i;
         if (mask & board->pawns) {
-            if (board->activeTeam == TEAMWHITE) {
-                possibleMoves[i].push_back({board->enPassantSquare, CAPTURE, i, (integer) (i + 7), PAWN, board->activeTeam});
-                possibleMoves[i].push_back({board->enPassantSquare, CAPTURE, i, (integer) (i + 9), PAWN, board->activeTeam});
+            if (board->whiteToMove == TEAMWHITE) {
+                possibleMoves[i].push_back({board->enPassantSquare, CAPTURE, i, (integer) (i + 7), PAWN, board->whiteToMove});
+                possibleMoves[i].push_back({board->enPassantSquare, CAPTURE, i, (integer) (i + 9), PAWN, board->whiteToMove});
             } else {
-                possibleMoves[i].push_back({board->enPassantSquare, CAPTURE, i, (integer) (i - 7), PAWN, board->activeTeam});
-                possibleMoves[i].push_back({board->enPassantSquare, CAPTURE, i, (integer) (i - 9), PAWN, board->activeTeam});
+                possibleMoves[i].push_back({board->enPassantSquare, CAPTURE, i, (integer) (i - 7), PAWN, board->whiteToMove});
+                possibleMoves[i].push_back({board->enPassantSquare, CAPTURE, i, (integer) (i - 9), PAWN, board->whiteToMove});
             }
         } else if (mask & board->bishops) {
             possibleMoves[i] = calculateSlidingPieceMoves(i, {-9, -7, 7, 9});
@@ -81,15 +83,15 @@ std::map<integer, std::vector<Move>> GameLogic::calculateMoves(bool onlyLegalMov
     bit_board pieces;
     std::map<integer, std::vector<Move>> possibleMoves;
     if (onlyLegalMoves) {
-        if (board->activeTeam == TEAMWHITE) {
+        if (board->whiteToMove == TEAMWHITE) {
             board->whitePieces &= ~(1ULL << board->whiteKingPos);
         } else {
             board->blackPieces &= ~(1ULL << board->blackKingPos);
         }
-        board->activeTeam = !board->activeTeam;
+        board->whiteToMove = !board->whiteToMove;
         this->setOpponentControlledSquares();
-        board->activeTeam = !board->activeTeam;
-        if (board->activeTeam == TEAMWHITE) {
+        board->whiteToMove = !board->whiteToMove;
+        if (board->whiteToMove == TEAMWHITE) {
             board->whitePieces |= 1ULL << board->whiteKingPos;
         } else {
             board->blackPieces |= 1ULL << board->blackKingPos;
@@ -97,7 +99,7 @@ std::map<integer, std::vector<Move>> GameLogic::calculateMoves(bool onlyLegalMov
     }
     int x;
     int y = intToY(board->whiteKingPos);
-    if (board->activeTeam == TEAMWHITE) {
+    if (board->whiteToMove == TEAMWHITE) {
         pieces = board->whitePieces;
         x = intToX(board->whiteKingPos);
         y = intToY(board->whiteKingPos);
@@ -158,7 +160,7 @@ std::map<integer, std::vector<Move>> GameLogic::calculateMoves(bool onlyLegalMov
                         continue;
                     }
                 } else if (!((1ULL << move.oldPos) & (allPinDirs & board->opponentSquares))) {
-                    if (board->activeTeam == TEAMWHITE) {
+                    if (board->whiteToMove == TEAMWHITE) {
                         if (!((1ULL << board->whiteKingPos) & board->opponentSquares)) {
                             continue;
                         }
@@ -171,7 +173,7 @@ std::map<integer, std::vector<Move>> GameLogic::calculateMoves(bool onlyLegalMov
                     bit_board oldPosBitboard = 1ULL << move.oldPos;
                     bit_board opponentDiagonalSliders = board->bishops | board->queens;
                     bit_board opponentStraightSliders = board->rooks | board->queens;
-                    if (board->activeTeam == TEAMWHITE) {
+                    if (board->whiteToMove == TEAMWHITE) {
                         opponentDiagonalSliders &= board->blackPieces;
                         opponentStraightSliders &= board->blackPieces;
                     } else {
@@ -182,7 +184,7 @@ std::map<integer, std::vector<Move>> GameLogic::calculateMoves(bool onlyLegalMov
                 makeMove(board, move);
                 bit_board pieceBitboard;
                 integer king;
-                if (board->activeTeam == TEAMWHITE) {
+                if (board->whiteToMove == TEAMWHITE) {
                     pieceBitboard = board->whitePieces;
                     king = board->blackKingPos;
                 } else {
@@ -308,62 +310,62 @@ std::vector<Move> GameLogic::calculatePawnMoves(integer piece) {
 
     bit_board allPieces = board->blackPieces | board->whitePieces;
     bit_board pieceBitBoard = 1ULL << piece;
-    bit_board forward = 1ULL << (piece + (board->activeTeam == TEAMWHITE ? 8 : -8));
+    bit_board forward = 1ULL << (piece + (board->whiteToMove == TEAMWHITE ? 8 : -8));
     forward &= ~allPieces;
     integer newPos;
     integer newY;
     if (forward) {
-        newPos = piece + (board->activeTeam == TEAMWHITE ? 8 : -8);
+        newPos = piece + (board->whiteToMove == TEAMWHITE ? 8 : -8);
         newY = intToY(newPos);
         if (newY == 7 || newY == 0) {
-            pieceMoves.push_back({board->enPassantSquare, PROMOTION, piece, newPos, PAWN, board->activeTeam, newPos, QUEEN, QUEEN});
+            pieceMoves.push_back({board->enPassantSquare, PROMOTION, piece, newPos, PAWN, board->whiteToMove, newPos, QUEEN, QUEEN});
         } else {
             pieceMoves.push_back({board->enPassantSquare, NORMAL_MOVE, piece, newPos});
-            bit_board pawnSpawns = 0xFFULL << (board->activeTeam == TEAMWHITE ? 8 : 48);
+            bit_board pawnSpawns = 0xFFULL << (board->whiteToMove == TEAMWHITE ? 8 : 48);
             if (pieceBitBoard & pawnSpawns) {
-                forward = 1ULL << (piece + (board->activeTeam == TEAMWHITE ? 16 : -16));
+                forward = 1ULL << (piece + (board->whiteToMove == TEAMWHITE ? 16 : -16));
                 forward &= ~allPieces;
                 if (forward) {
-                    pieceMoves.push_back({board->enPassantSquare, DOUBLE_PAWN_PUSH, piece, (integer) (piece + (board->activeTeam == TEAMWHITE ? 16 : -16))});
+                    pieceMoves.push_back({board->enPassantSquare, DOUBLE_PAWN_PUSH, piece, (integer) (piece + (board->whiteToMove == TEAMWHITE ? 16 : -16))});
                 }
             }
         }
     }
     if (piece % 8 - 1 >= 0) { // Can go left
-        newPos = piece + (board->activeTeam == TEAMWHITE ? 7 : -9);
+        newPos = piece + (board->whiteToMove == TEAMWHITE ? 7 : -9);
         newY = intToY(newPos);
 
         bit_board left = 1ULL << newPos;
-        left &= board->activeTeam == TEAMWHITE ? board->blackPieces : board->whitePieces;
+        left &= board->whiteToMove == TEAMWHITE ? board->blackPieces : board->whitePieces;
         if (left) {
             if (newY == 7 || newY == 0) {
-                pieceMoves.push_back({board->enPassantSquare, CAPTURE_PROMOTION, piece, newPos, PAWN, board->activeTeam, newPos, getPiece(board, newPos), QUEEN});
+                pieceMoves.push_back({board->enPassantSquare, CAPTURE_PROMOTION, piece, newPos, PAWN, board->whiteToMove, newPos, getPiece(board, newPos), QUEEN});
             } else {
-                pieceMoves.push_back({board->enPassantSquare, CAPTURE, piece, newPos, PAWN, board->activeTeam, newPos, getPiece(board, newPos)});
+                pieceMoves.push_back({board->enPassantSquare, CAPTURE, piece, newPos, PAWN, board->whiteToMove, newPos, getPiece(board, newPos)});
             }
         } else if (board->enPassantSquare & (1ULL << 7)) {
             if (piece - 1 ==
                 (board->enPassantSquare & ~(1ULL << 7))) { // Checks if the square next to it is the enPassantSquare
-                pieceMoves.push_back({board->enPassantSquare, EN_PASSANT, piece, newPos, PAWN, board->activeTeam, (integer) (piece - 1), PAWN});
+                pieceMoves.push_back({board->enPassantSquare, EN_PASSANT, piece, newPos, PAWN, board->whiteToMove, (integer) (piece - 1), PAWN});
             }
         }
     }
     if (piece % 8 + 1 < 8) { // Can go right
-        newPos = piece + (board->activeTeam == TEAMWHITE ? 9 : -7);
+        newPos = piece + (board->whiteToMove == TEAMWHITE ? 9 : -7);
         newY = intToY(newPos);
 
         bit_board right = 1ULL << newPos;
-        right &= board->activeTeam == TEAMWHITE ? board->blackPieces : board->whitePieces;
+        right &= board->whiteToMove == TEAMWHITE ? board->blackPieces : board->whitePieces;
         if (right) {
             if (newY == 7 || newY == 0) {
-                pieceMoves.push_back({board->enPassantSquare, CAPTURE_PROMOTION, piece, newPos, PAWN, board->activeTeam, newPos, getPiece(board, newPos), QUEEN});
+                pieceMoves.push_back({board->enPassantSquare, CAPTURE_PROMOTION, piece, newPos, PAWN, board->whiteToMove, newPos, getPiece(board, newPos), QUEEN});
             } else {
-                pieceMoves.push_back({board->enPassantSquare, CAPTURE, piece, newPos, PAWN, board->activeTeam, newPos, getPiece(board, newPos)});
+                pieceMoves.push_back({board->enPassantSquare, CAPTURE, piece, newPos, PAWN, board->whiteToMove, newPos, getPiece(board, newPos)});
             }
         } else if (board->enPassantSquare & (1ULL << 7)) {
             if (piece + 1 ==
                 (board->enPassantSquare & ~(1ULL << 7))) { // Checks if the square next to it is the enPassantSquare
-                pieceMoves.push_back({board->enPassantSquare, EN_PASSANT, piece, newPos, PAWN, board->activeTeam, (integer) (piece + 1), PAWN});
+                pieceMoves.push_back({board->enPassantSquare, EN_PASSANT, piece, newPos, PAWN, board->whiteToMove, (integer) (piece + 1), PAWN});
             }
         }
 
@@ -386,7 +388,7 @@ std::vector<Move> GameLogic::calculateKnightMoves(integer piece) {
         else pieceBitBoard >>= -dir;
         if (!(pieceBitBoard & (pieceTeam == TEAMWHITE ? board->whitePieces : board->blackPieces))) {
             if (pieceBitBoard & (board->whitePieces | board->blackPieces)) {
-                pieceMoves.push_back({board->enPassantSquare, CAPTURE, piece, (integer)(piece + dir), KNIGHT, board->activeTeam, (integer)(piece + dir), getPiece(board, (piece + dir))});
+                pieceMoves.push_back({board->enPassantSquare, CAPTURE, piece, (integer)(piece + dir), KNIGHT, board->whiteToMove, (integer)(piece + dir), getPiece(board, (piece + dir))});
             } else {
                 pieceMoves.push_back({board->enPassantSquare, NORMAL_MOVE, piece, (integer) (piece + dir)});
             }
@@ -410,7 +412,7 @@ std::vector<Move> GameLogic::calculateKingMoves(integer piece, bool onlyLegalMov
         else pieceBitBoard >>= -dir;
         if (!(pieceBitBoard & (pieceTeam == TEAMWHITE ? board->whitePieces : board->blackPieces))) {
             if (pieceBitBoard & (board->whitePieces | board->blackPieces)) {
-                pieceMoves.push_back({board->enPassantSquare, CAPTURE, piece, (integer) (piece + dir), KING, board->activeTeam, (integer) (piece + dir), getPiece(board, (piece + dir))});
+                pieceMoves.push_back({board->enPassantSquare, CAPTURE, piece, (integer) (piece + dir), KING, board->whiteToMove, (integer) (piece + dir), getPiece(board, (piece + dir))});
             } else {
                 if (onlyLegalMoves) {
                     if (1ULL << (piece + dir) & board->opponentSquares) {
@@ -435,7 +437,7 @@ std::vector<Move> GameLogic::calculateSlidingPieceMoves(integer piece, std::vect
             else pieceBitBoard >>= -dir;
             if (pieceTeam == TEAMWHITE) {
                 if (pieceBitBoard & board->blackPieces) {
-                    pieceMoves.push_back({board->enPassantSquare, CAPTURE, piece, (integer)(piece + (dir * i)), getPiece(board, piece), board->activeTeam, (integer)(piece + (dir * i)), getPiece(board, piece + (dir * i))});
+                    pieceMoves.push_back({board->enPassantSquare, CAPTURE, piece, (integer)(piece + (dir * i)), getPiece(board, piece), board->whiteToMove, (integer)(piece + (dir * i)), getPiece(board, piece + (dir * i))});
                     break;
                 } else if (pieceBitBoard & board->whitePieces) {
                     break;
@@ -443,7 +445,7 @@ std::vector<Move> GameLogic::calculateSlidingPieceMoves(integer piece, std::vect
                 pieceMoves.push_back({board->enPassantSquare, NORMAL_MOVE, piece, (integer)(piece + (dir * i))});
             } else {
                 if (pieceBitBoard & board->whitePieces) {
-                    pieceMoves.push_back({board->enPassantSquare, CAPTURE, piece, (integer)(piece + (dir * i)), getPiece(board, piece), board->activeTeam, (integer)(piece + (dir * i)), getPiece(board, piece + (dir * i))});
+                    pieceMoves.push_back({board->enPassantSquare, CAPTURE, piece, (integer)(piece + (dir * i)), getPiece(board, piece), board->whiteToMove, (integer)(piece + (dir * i)), getPiece(board, piece + (dir * i))});
                     break;
                 } else if (pieceBitBoard & board->blackPieces) {
                     break;

@@ -4,6 +4,7 @@
 #include "raylib.h"
 #include <iostream>
 #define bit_board uint_fast64_t
+#define small_move uint16_t
 #define integer uint8_t
 #define TEAMWHITE true
 #define TEAMBLACK false
@@ -29,6 +30,25 @@ enum Piece {
     NONE
 };
 
+enum Flag {
+    NoFlag,
+    EnPassantCaptureFlag,
+    CastleFlag,
+    DoublePush,
+
+    PromoteToQueenFlag,
+    PromoteToKnightFlag,
+    PromoteToRookFlag,
+    PromoteToBishopFlag,
+};
+
+const small_move startSquareMask = 0b0000000000111111;
+const small_move targetSquareMask = 0b0000111111000000;
+const small_move flagMask = 0b1111000000000000;
+
+inline small_move create_move(integer startSquare, integer targetSquare, Flag flag = NoFlag) {
+    return (startSquare | targetSquare << 6 | flag << 12);
+}
 
 struct Move {
     integer prevEnPassantSquare = 0;
@@ -62,13 +82,15 @@ struct Board {
     bit_board rooks = 0ULL;
     bit_board queens = 0ULL;
     bit_board kings = 0ULL;
+    bit_board emptySquares = 0ULL;
+    bit_board enemyPieces = 0ULL;
     integer blackKingPos = 0;
     integer whiteKingPos = 0;
     uint8_t castleRights = 0;
     integer enPassantSquare = 0; // First bit says if enPassant is possible
     int halfMoves = 0;
     int fullMoves = 0;
-    bool activeTeam = TEAMWHITE;
+    bool whiteToMove = TEAMWHITE;
     bit_board opponentSquares = 0ULL;
 };
 

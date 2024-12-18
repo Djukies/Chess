@@ -2,9 +2,11 @@
 #define CHESS_MOVEGENERATION_H
 
 #include "../../Types.h"
+#include "../Precomputed Data/PrecomputedData.h"
+#include "../Bitboard Utility/BitboardUtility.h"
 #include <vector>
 #include <map>
 
-inline std::map<integer, std::vector<Move>> calculateLegalMoves(Board* board);
+std::vector<Move> calculateLegalMoves(Board* board);
 
 #endif //CHESS_MOVEGENERATION_H

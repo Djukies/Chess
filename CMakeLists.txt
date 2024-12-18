@@ -20,7 +20,10 @@ add_executable(Chess src/main.cpp
         src/GameLogic/GameLogic.cpp
         src/GameLogic/GameLogic.h
         src/GameLogic/MoveGeneration/MoveGeneration.cpp
-        src/GameLogic/MoveGeneration/MoveGeneration.h)
+        src/GameLogic/MoveGeneration/MoveGeneration.h
+        "src/GameLogic/Precomputed Data/PrecomputedData.cpp"
+        "src/GameLogic/Precomputed Data/PrecomputedData.h"
+        "src/GameLogic/Bitboard Utility/BitboardUtility.h")
 
 add_compile_options("-g -O0")
 target_link_libraries(Chess raylib)

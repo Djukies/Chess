@@ -133,8 +133,8 @@ void loadBoard(Board* board, const std::string boardFen) {
 }
 
 void loadActiveTeam(Board* board, const std::string activeTeamFen) {
-    if (activeTeamFen == "w") board->activeTeam = TEAMWHITE;
-    else board->activeTeam = TEAMBLACK;
+    if (activeTeamFen == "w") board->whiteToMove = TEAMWHITE;
+    else board->whiteToMove = TEAMBLACK;
 }
 
 void loadCastleRights(Board* board, const std::string castleRightsFen) {
