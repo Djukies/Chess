@@ -7,6 +7,8 @@
 #include "Types.h"
 #include "Board/Board.h"
 #include "GameLogic/GameLogic.h"
+#include "GameLogic/Precomputed Data/PrecomputedData.h"
+#include "GameLogic/MoveGeneration/MoveGeneration.h"
 
 int main() {
 
@@ -18,7 +20,7 @@ int main() {
     SetWindowMinSize(300, 300);
 
     // Set up the Board
-    std::string FEN = "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr w KQkq - 0 10";//RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr w KQkq - 0 10
+    std::string FEN = "RNBQKBNR/PPPPPPPP/3k4/8/8/8/pppppppp/rnbqkbnr w KQkq - 0 10";//RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr w KQkq - 0 10
     Board* board = loadBoardFromFEN(FEN);
     // Set up the classes
     auto* gameLogic = new GameLogic(board);
@@ -26,10 +28,11 @@ int main() {
     auto* debug = new Debug(renderer, board, gameLogic);
 
     // Set the moves at beginning (rest will automatic after move)
+    precompute();
     gameLogic->moves = gameLogic->calculateMoves();
     // Test the moveGen (prints the amount of moves at every depth till depth:)
-    debug->moveGenTest(5);
-
+    debug->moveGenTest(0);
+    calculateLegalMoves(board);
     // Loop while the window shouldn't close
     while (!WindowShouldClose())
     {

@@ -121,7 +121,7 @@ void makeMove(Board* board, Move move) {
     else if (move.move_type == CASTLE) {
     }
 
-    board->activeTeam = !board->activeTeam;
+    board->whiteToMove = !board->whiteToMove;
     board->fullMoves ++;
 }
 
@@ -157,6 +157,6 @@ void unmakeMove(Board* board, Move move) {
         case CASTLE:
             break;
     }
-    board->activeTeam = !board->activeTeam;
+    board->whiteToMove = !board->whiteToMove;
     board->fullMoves--;
 }

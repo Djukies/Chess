@@ -34,7 +34,7 @@ void Renderer::drawBoard() {
 
 void Renderer::drawMoves() {
     bit_board activePieceMask = 1ULL << activePiece;
-    bit_board teamBitboard = board->activeTeam == TEAMWHITE ? board->whitePieces : board->blackPieces;
+    bit_board teamBitboard = board->whiteToMove == TEAMWHITE ? board->whitePieces : board->blackPieces;
     if (activePieceMask & teamBitboard) {
         for (Move move : gameLogic->moves[activePiece]) {
             bool shouldHaveSmallCircle = move.move_type == NORMAL_MOVE || move.move_type == DOUBLE_PAWN_PUSH;
