@@ -18,7 +18,9 @@ add_executable(Chess src/main.cpp
         src/Debug/Debug.cpp
         src/Debug/Debug.h
         src/GameLogic/GameLogic.cpp
-        src/GameLogic/GameLogic.h)
+        src/GameLogic/GameLogic.h
+        src/GameLogic/MoveGeneration/MoveGeneration.cpp
+        src/GameLogic/MoveGeneration/MoveGeneration.h)
 
 add_compile_options("-g -O0")
 target_link_libraries(Chess raylib)

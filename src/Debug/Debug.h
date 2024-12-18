@@ -13,11 +13,13 @@ private:
     int showPreviousBitBoard = KEY_LEFT;
     Renderer* renderer;
     Board* board;
+    GameLogic* gameLogic;
     void showBitBoards();
     int currentBitBoard = 0;
 public:
-    Debug(Renderer* renderer, Board* board);
+    Debug(Renderer* renderer, Board* board, GameLogic* gameLogic);
     void debugAll();
+    void moveGenTest(int depth);
     std::vector<bit_board> bitBoards = {};
 };
 
