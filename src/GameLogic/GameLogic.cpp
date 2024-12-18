@@ -4,7 +4,7 @@
 GameLogic::GameLogic(Board *board) : board(board) {}
 
 void GameLogic::undoMoves() {
-    /*if (IsKeyPressed(KEY_LEFT)) {
+    if (IsKeyPressed(KEY_LEFT)) {
 
         if (board->fullMoves - firstMadMove-1 < 0) {
             return;
@@ -16,7 +16,7 @@ void GameLogic::undoMoves() {
             Move move = madeMoves[board->fullMoves - firstMadMove];
             makeMove(board, move);
         }
-    }*/
+    }
 }
 
 

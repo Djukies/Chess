@@ -2,6 +2,9 @@
 #define CHESS_DEBUG_H
 #include <vector>
 #include <raylib.h>
+#include <chrono>
+#include <iomanip>
+
 #include "../Types.h"
 #include "../Renderer/Renderer.h"
 
