@@ -1,6 +1,7 @@
+#include <iomanip>
 #include "Debug.h"
 
-Debug::Debug(Renderer* renderer, Board* board) : renderer(renderer), board(board) {
+Debug::Debug(Renderer* renderer, Board* board, GameLogic* gameLogic) : renderer(renderer), board(board), gameLogic(gameLogic) {
 
 }
 
@@ -48,4 +49,48 @@ void Debug::showBitBoards() {
     int bitBoardIndex = this->currentBitBoard % (int)this->bitBoards.size();
     if (bitBoardIndex == 0) return;
     renderer->drawBitBoard(this->bitBoards[bitBoardIndex]);
+}
+
+double moveCount = 0;
+int captures = 0;
+int enPassants = 0;
+void MoveGenerationTest(Board* board, const int depth, GameLogic* gameLogic)
+{
+
+    if (depth == 0)
+    {
+        return;
+    }
+    for (const std::map<integer, std::vector<Move>> moveVector = gameLogic->calculateMoves();
+            const auto &[fst, moves] : moveVector)
+    {
+        if (depth == 1) moveCount += (double)moves.size();
+        for (const Move move : moves)
+        {
+            if (depth == 1) {
+                if ((move.move_type == CAPTURE || move.move_type == CAPTURE_PROMOTION || move.move_type == EN_PASSANT)) {
+                    captures++;
+                    if (move.move_type == EN_PASSANT) {
+                        enPassants++;
+                    }
+                }
+                continue;
+            }
+            makeMove(board, move);
+            MoveGenerationTest(board, depth - 1,  gameLogic);
+            unmakeMove(board, move);
+        }
+    }
+}
+
+void Debug::moveGenTest(int depth) {
+    for (int checkDepth = 0; checkDepth <= depth; checkDepth++) {
+        moveCount = 0;
+        captures = 0;
+        enPassants = 0;
+        const auto start = std::chrono::high_resolution_clock::now();
+        MoveGenerationTest(board, checkDepth, gameLogic);
+        const auto end = std::chrono::high_resolution_clock::now();
+        const auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << "Depth: " << checkDepth << ", Moves: " << std::fixed << std::setprecision(0) << moveCount << ", Time taken: " << time.count() << "ms" << " (Captures: " << captures << ", En Passants: " << enPassants << ")" << std::endl;    }
 }
