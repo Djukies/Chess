@@ -1,4 +1,3 @@
-#include <iomanip>
 #include "Debug.h"
 
 Debug::Debug(Renderer* renderer, Board* board, GameLogic* gameLogic) : renderer(renderer), board(board), gameLogic(gameLogic) {

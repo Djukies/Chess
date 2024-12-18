@@ -122,7 +122,7 @@ void makeMove(Board* board, Move move) {
     }
 
     board->activeTeam = !board->activeTeam;
-    board->fullMoves += 1;
+    board->fullMoves ++;
 }
 
 void unmakeMove(Board* board, Move move) {
@@ -158,4 +158,5 @@ void unmakeMove(Board* board, Move move) {
             break;
     }
     board->activeTeam = !board->activeTeam;
+    board->fullMoves--;
 }
