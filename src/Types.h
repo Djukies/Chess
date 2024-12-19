@@ -82,6 +82,7 @@ struct Board {
     bit_board rooks = 0ULL;
     bit_board queens = 0ULL;
     bit_board kings = 0ULL;
+    bit_board allPieces = 0ULL;
     bit_board friendlyPieces = 0ULL;
     bit_board emptySquares = 0ULL;
     bit_board enemyPieces = 0ULL;

@@ -47,11 +47,11 @@ void Debug::showBitBoards() {
 
 
     bit_board allKnightMoves = 0ULL;
-    bit_board knights = board->knights & board->friendlyPieces;
+    bit_board knights = board->kings & board->friendlyPieces;
     while (knights != 0) {
         integer startSquare = getIndex(knights);
         knights &= knights-1;
-        allKnightMoves |= knightMoves[startSquare] & (board->emptySquares | board->enemyPieces);
+        allKnightMoves |= possibleKnightMoves[startSquare] & (board->emptySquares | board->enemyPieces);
     }
 
 

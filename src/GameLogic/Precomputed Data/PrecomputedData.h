@@ -6,8 +6,9 @@
 #include "../Bitboard Utility/BitboardUtility.h"
 
 inline integer distanceToEdge[64][8];
-inline bit_board kingMoves[64];
-inline bit_board knightMoves[64];
+inline int directions[8] = {-8, 8, -1, 1, -9, 9, -7, 7};
+inline bit_board possibleKingMoves[64];
+inline bit_board possibleKnightMoves[64];
 
 // Function to compute values
 inline void computeDistanceToEdge() {
@@ -42,7 +43,7 @@ inline void computeKingMoves() {
         bit_board kingXP1 = (kingX << 1) & notFileA;
         bit_board kingXM1 = (kingX >> 1) & notFileH;
 
-        kingMoves[pos] = (kingYM1|kingY|kingYP1) & (kingXM1|kingX|kingXP1) & ~(1ULL << pos);
+        possibleKingMoves[pos] = (kingYM1|kingY|kingYP1) & (kingXM1|kingX|kingXP1) & ~(1ULL << pos);
     }
 }
 
@@ -50,12 +51,15 @@ inline void computeKnightMoves() {
     int dirs[8] = {-17, -15, -10, -6, 6, 10, 15, 17};
     for (integer pos = 0; pos < 64; pos++) {
         for (int dir: dirs) {
-            knightMoves[pos] |= shift(1ULL, pos + dir);
+            possibleKnightMoves[pos] |= shift(1ULL, pos + dir);
         }
         if (containsSquare(rightSide, pos)) {
-            knightMoves[pos] &= notFileAB;
+            possibleKnightMoves[pos] &= notFileAB;
         } else {
-            knightMoves[pos] &= notFileGH;
+            possibleKnightMoves[pos] &= notFileGH;
+        }
+        if (containsSquare(downSide, pos)) {
+            possibleKnightMoves[pos] &= notRank12;
         }
     }
 }
