@@ -28,7 +28,7 @@ bool GameLogic::tryMove(uint8_t oldPos, uint8_t newPos) {
         while (board->fullMoves - firstMadMove <= madeMoves.size()) {
             madeMoves.pop_back();
         }
-        board->whiteToMove = TEAMWHITE;
+        //board->whiteToMove = TEAMWHITE;
         this->moves = this->calculateMoves();
         madeMoves.push_back(move);
         calculateLegalMoves(board);

@@ -29,6 +29,12 @@ const bit_board rank6 = rank5 << 8;
 const bit_board rank7 = rank6 << 8;
 const bit_board rank8 = rank7 << 8;
 
+const bit_board upSide = rank1 | rank2 | rank3 | rank4;
+const bit_board downSide = ~upSide;
+
+const bit_board notRank12 = ~(rank1 | rank2);
+const bit_board notRank78 = ~(rank7 | rank8);
+
 inline bit_board shift(bit_board bitboard, int amount) {
     if (amount > 0) {
         return bitboard << amount;

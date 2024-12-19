@@ -7,6 +7,6 @@
 #include <vector>
 #include <map>
 
-std::vector<Move> calculateLegalMoves(Board* board);
+std::vector<small_move> calculateLegalMoves(Board* board);
 
 #endif //CHESS_MOVEGENERATION_H
