@@ -20,7 +20,7 @@ int main() {
     SetWindowMinSize(300, 300);
 
     // Set up the Board
-    std::string FEN = "RNBQKBNR/PPPPPPPP/3k4/8/8/8/pppppppp/rnbqkbnr w KQkq - 0 10";//RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr w KQkq - 0 10
+    std::string FEN = "RNBQkBNR/PPPPPPPP/3k4/3K4/8/8/pppppppp/rnbqkbnr w KQkq - 0 10";//RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr w KQkq - 0 10
     Board* board = loadBoardFromFEN(FEN);
     // Set up the classes
     auto* gameLogic = new GameLogic(board);

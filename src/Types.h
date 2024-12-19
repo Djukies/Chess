@@ -82,10 +82,12 @@ struct Board {
     bit_board rooks = 0ULL;
     bit_board queens = 0ULL;
     bit_board kings = 0ULL;
+    bit_board friendlyPieces = 0ULL;
     bit_board emptySquares = 0ULL;
     bit_board enemyPieces = 0ULL;
     integer blackKingPos = 0;
     integer whiteKingPos = 0;
+    integer friendlyKingPos = 0;
     uint8_t castleRights = 0;
     integer enPassantSquare = 0; // First bit says if enPassant is possible
     int halfMoves = 0;
