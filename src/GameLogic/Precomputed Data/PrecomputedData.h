@@ -1,11 +1,13 @@
 #ifndef CHESS_PRECOMPUTEDDATA_H
 #define CHESS_PRECOMPUTEDDATA_H
 
+#include <vector>
 #include "../../Types.h"
 #include "../Bitboard Utility/BitboardUtility.h"
 
 inline integer distanceToEdge[64][8];
 inline bit_board kingMoves[64];
+inline bit_board knightMoves[64];
 
 // Function to compute values
 inline void computeDistanceToEdge() {
@@ -44,9 +46,24 @@ inline void computeKingMoves() {
     }
 }
 
+inline void computeKnightMoves() {
+    int dirs[8] = {-17, -15, -10, -6, 6, 10, 15, 17};
+    for (integer pos = 0; pos < 64; pos++) {
+        for (int dir: dirs) {
+            knightMoves[pos] |= shift(1ULL, pos + dir);
+        }
+        if (containsSquare(rightSide, pos)) {
+            knightMoves[pos] &= notFileAB;
+        } else {
+            knightMoves[pos] &= notFileGH;
+        }
+    }
+}
+
 inline void precompute() {
     computeDistanceToEdge();
     computeKingMoves();
+    computeKnightMoves();
 }
 
 #endif //CHESS_PRECOMPUTEDDATA_H

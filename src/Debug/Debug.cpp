@@ -45,11 +45,19 @@ void Debug::showBitBoards() {
     bit_board kingXP1 = (kingX << 1) & notFileA;
     bit_board kingXM1 = (kingX >> 1) & notFileH;
 
-    bit_board kingMoves = (kingYM1|kingY|kingYP1) & (kingXM1|kingX|kingXP1) & ~(1ULL << board->whiteKingPos);
+
+    bit_board allKnightMoves = 0ULL;
+    bit_board knights = board->knights & board->friendlyPieces;
+    while (knights != 0) {
+        integer startSquare = getIndex(knights);
+        knights &= knights-1;
+        allKnightMoves |= knightMoves[startSquare] & (board->emptySquares | board->enemyPieces);
+    }
 
 
     this->bitBoards = {0ULL,
-                       kingMoves,
+                       allKnightMoves,
+                       rightSide,
                        kingYM1|kingY|kingYP1,
                        kingXM1|kingX|kingXP1,
                        diagonals, straights, all,

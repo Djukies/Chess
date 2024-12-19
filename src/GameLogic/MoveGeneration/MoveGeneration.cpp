@@ -77,8 +77,21 @@ std::vector<small_move> calculatePawnMoves(Board* board) {
     return moves;
 }
 
-std::vector<Move> calculateKnightMoves(bit_board knights) {
-    return {};
+std::vector<small_move> calculateKnightMoves(Board* board) {
+    std::vector<small_move> moves;
+    bit_board knights = board->knights & board->friendlyPieces;
+    while (knights != 0) {
+        integer startSquare = getIndex(knights);
+        knights &= knights-1;
+        bit_board possibleMoves = knightMoves[startSquare] & (board->emptySquares | board->enemyPieces);
+        while (possibleMoves != 0) {
+            integer targetSquare = getIndex(possibleMoves);
+            possibleMoves &= possibleMoves - 1;
+            moves.push_back(create_move(startSquare, targetSquare));
+        }
+    }
+
+    return moves;
 }
 
 std::vector<small_move> calculateKingMoves(Board* board) {
@@ -103,11 +116,16 @@ std::vector<Move> calculateLegalMoves(Board* board) {
     board->emptySquares = ~(board->whitePieces | board->blackPieces);
     board->enemyPieces = board->blackPieces;
     board->friendlyKingPos = board->whiteKingPos;
+    std::cout << "PAWNS:" << std::endl;
     for (small_move move : calculatePawnMoves(board)) {
         std::cout << "Start: " << (int)(move & startSquareMask) << ", End: " << (int)((move & targetSquareMask) >> 6) << ", Flags: " << (int)((move & flagMask) >> 12) << std::endl;
     }
-    std::cout << board->friendlyKingPos << std::endl;
+    std::cout << "KINGS:" << std::endl;
     for (small_move move : calculateKingMoves(board)) {
+        std::cout << "Start: " << (int)(move & startSquareMask) << ", End: " << (int)((move & targetSquareMask) >> 6) << ", Flags: " << (int)((move & flagMask) >> 12) << std::endl;
+    }
+    std::cout << "KNIGHTS:" << std::endl;
+    for (small_move move : calculateKnightMoves(board)) {
         std::cout << "Start: " << (int)(move & startSquareMask) << ", End: " << (int)((move & targetSquareMask) >> 6) << ", Flags: " << (int)((move & flagMask) >> 12) << std::endl;
     }
     return {};
