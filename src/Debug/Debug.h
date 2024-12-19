@@ -4,7 +4,7 @@
 #include <raylib.h>
 #include <chrono>
 #include <iomanip>
-
+#include "../GameLogic/Bitboard Utility/BitboardUtility.h"
 #include "../Types.h"
 #include "../Renderer/Renderer.h"
 

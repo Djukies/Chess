@@ -39,7 +39,19 @@ void Debug::showBitBoards() {
     bit_board diagonals = topLeft | topRight | bottomLeft | bottomRight;
     bit_board all = left | right | up | down | topLeft | topRight | bottomLeft | bottomRight;
 
+    bit_board kingYP1 = kingY << 8;
+    bit_board kingYM1 = kingY >> 8;
+
+    bit_board kingXP1 = (kingX << 1) & notFileA;
+    bit_board kingXM1 = (kingX >> 1) & notFileH;
+
+    bit_board kingMoves = (kingYM1|kingY|kingYP1) & (kingXM1|kingX|kingXP1) & ~(1ULL << board->whiteKingPos);
+
+
     this->bitBoards = {0ULL,
+                       kingMoves,
+                       kingYM1|kingY|kingYP1,
+                       kingXM1|kingX|kingXP1,
                        diagonals, straights, all,
                        board->whitePieces|board->blackPieces, board->whitePieces, board->blackPieces, board->pawns, board->knights, board->bishops, board->rooks, board->queens, board->kings};
     if (IsKeyPressed(this->showNextBitboard)) this->currentBitBoard++;

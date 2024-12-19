@@ -7,8 +7,9 @@ void generatePromotions(integer startSquare, integer targetSquare, std::vector<s
     moves.push_back(create_move(startSquare, targetSquare, PromoteToRookFlag));
 }
 
-std::vector<small_move> calculatePawnMoves(Board* board, bit_board pawns) {
+std::vector<small_move> calculatePawnMoves(Board* board) {
     std::vector<small_move> moves;
+    bit_board pawns = board->pawns & board->friendlyPieces;
     int pushDir = board->whiteToMove ? 1 : -1;
 
     bit_board promotionRankMask = board->whiteToMove ? rank8 : rank1;
@@ -80,8 +81,16 @@ std::vector<Move> calculateKnightMoves(bit_board knights) {
     return {};
 }
 
-std::vector<Move> calculateKingMoves(bit_board kings) {
-    return {};
+std::vector<small_move> calculateKingMoves(Board* board) {
+    std::vector<small_move> moves;
+    bit_board possibleMoves = kingMoves[board->friendlyKingPos] & (board->emptySquares | board->enemyPieces);
+    while (possibleMoves != 0) {
+        integer targetSquare = getIndex(possibleMoves);
+        possibleMoves &= possibleMoves-1;
+        moves.push_back(create_move(board->friendlyKingPos, targetSquare));
+    }
+
+    return moves;
 }
 
 std::vector<Move> calculateSlidingPieceMoves(bit_board piece, integer startdir, integer enddir) {
@@ -90,9 +99,15 @@ std::vector<Move> calculateSlidingPieceMoves(bit_board piece, integer startdir, 
 
 std::vector<Move> calculateLegalMoves(Board* board) {
     std::cout << "bals" << std::endl;
+    board->friendlyPieces = board->whitePieces;
     board->emptySquares = ~(board->whitePieces | board->blackPieces);
     board->enemyPieces = board->blackPieces;
-    for (small_move move : calculatePawnMoves(board, board->pawns & board->whitePieces)) {
+    board->friendlyKingPos = board->whiteKingPos;
+    for (small_move move : calculatePawnMoves(board)) {
+        std::cout << "Start: " << (int)(move & startSquareMask) << ", End: " << (int)((move & targetSquareMask) >> 6) << ", Flags: " << (int)((move & flagMask) >> 12) << std::endl;
+    }
+    std::cout << board->friendlyKingPos << std::endl;
+    for (small_move move : calculateKingMoves(board)) {
         std::cout << "Start: " << (int)(move & startSquareMask) << ", End: " << (int)((move & targetSquareMask) >> 6) << ", Flags: " << (int)((move & flagMask) >> 12) << std::endl;
     }
     return {};
