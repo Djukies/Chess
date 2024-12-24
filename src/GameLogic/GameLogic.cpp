@@ -7,34 +7,59 @@ GameLogic::GameLogic(Board *board) : board(board) {}
 void GameLogic::undoMoves() {
     if (IsKeyPressed(KEY_LEFT)) {
 
-        if (board->fullMoves - firstMadMove-1 < 0) {
+        if (board->fullMoves - firstMadMove <= 0) {
             return;
         }
-        unmakeMove(board, madeMoves[board->fullMoves - firstMadMove-1]);
-        board->fullMoves -= 1;
+        unMakeSmallMove(board, madeMoves[board->fullMoves - firstMadMove-1]);
+        board->movesVector = calculateLegalMoves(board);
+        board->movesMap = moveVectorToMap(board->movesVector);
     } else if (IsKeyPressed(KEY_RIGHT)) {
         if (board->fullMoves - firstMadMove < madeMoves.size()) {
-            Move move = madeMoves[board->fullMoves - firstMadMove];
-            makeMove(board, move);
+            small_move move = madeMoves[board->fullMoves - firstMadMove];
+            makeSmallMove(board, move);
+            board->movesVector = calculateLegalMoves(board);
+            board->movesMap = moveVectorToMap(board->movesVector);
         }
     }
 }
 
 
 bool GameLogic::tryMove(uint8_t oldPos, uint8_t newPos) {
-    Move move = getMove(oldPos, newPos, moves);
-    if (move.move_type != NO_MOVE) {
-        makeMove(board, move);
-        while (board->fullMoves - firstMadMove <= madeMoves.size()) {
-            madeMoves.pop_back();
+    small_move smallMove = getSmallMove(oldPos, newPos, board->movesMap);
+    if (smallMove != 0) {
+        makeSmallMove(board, smallMove);
+
+        board->movesVector = calculateLegalMoves(board);
+        board->movesMap = moveVectorToMap(board->movesVector);
+        if (board->fullMoves-firstMadMove > madeMoves.size()) {
+            madeMoves.push_back(smallMove);
+            return true;
         }
-        //board->whiteToMove = TEAMWHITE;
-        this->moves = this->calculateMoves();
-        madeMoves.push_back(move);
-        calculateLegalMoves(board);
+
+        if (smallMove != madeMoves[board->fullMoves - firstMadMove - 1]) {
+            uint size = madeMoves.size();
+            for (int i = board->fullMoves - firstMadMove - 1; i < size; i++) {
+                madeMoves.pop_back();
+            }
+            madeMoves.push_back(smallMove);
+        }
         return true;
-    } // Else
-    return false;
+    } /*else {
+        Move move = getMove(oldPos, newPos, moves);
+        if (move.move_type != NO_MOVE) {
+            makeMove(board, move);
+            while (board->fullMoves - firstMadMove <= madeMoves.size()) {
+                madeMoves.pop_back();
+            }
+            //board->whiteToMove = TEAMWHITE;
+            this->moves = this->calculateMoves();
+            madeMoves.push_back(move);
+            board->movesVector = calculateLegalMoves(board);
+            board->movesMap = moveVectorToMap(board->movesVector);
+            return true;
+        } // Else
+        return false;
+    }*/ return false;
 }
 
 void GameLogic::setOpponentControlledSquares() {
@@ -98,7 +123,7 @@ std::map<integer, std::vector<Move>> GameLogic::calculateMoves(bool onlyLegalMov
         }
     }
     int x;
-    int y = intToY(board->whiteKingPos);
+    int y;
     if (board->whiteToMove == TEAMWHITE) {
         pieces = board->whitePieces;
         x = intToX(board->whiteKingPos);
@@ -216,7 +241,7 @@ std::map<integer, std::vector<Move>> GameLogic::calculateMoves(bool onlyLegalMov
     return possibleMoves;
 }
 
-Piece getPiece(Board* board, integer pos) {
+/*inline Piece getPiece(Board* board, integer pos) {
     bit_board mask = 1ULL << pos;
     if (mask & board->pawns) return PAWN;
     if (mask & board->bishops) return BISHOP;
@@ -225,7 +250,7 @@ Piece getPiece(Board* board, integer pos) {
     if (mask & board->queens) return QUEEN;
     if (mask & board->kings) return KING;
     return NONE;
-}
+}*/
 
 bool getTeam(Board* board, integer pos) {
     bit_board mask = 1ULL << pos;
@@ -455,4 +480,14 @@ std::vector<Move> GameLogic::calculateSlidingPieceMoves(integer piece, std::vect
         }
     }
     return pieceMoves;
+}
+
+std::map<integer, std::vector<small_move>> GameLogic::moveVectorToMap(std::vector<small_move> movesToRework) {
+    std::map<integer, std::vector<small_move>> movesToReturn;
+
+    for (small_move move : movesToRework) {
+        movesToReturn[move & startSquareMask].push_back(move);
+    }
+
+    return movesToReturn;
 }

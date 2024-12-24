@@ -29,9 +29,17 @@ int main() {
 
     // Set the moves at beginning (rest will automatic after move)
     precompute();
+    board->movesVector = calculateLegalMoves(board);
+    board->movesMap = gameLogic->moveVectorToMap(board->movesVector);
+
+
     gameLogic->moves = gameLogic->calculateMoves();
     // Test the moveGen (prints the amount of moves at every depth till depth:)
-    debug->moveGenTest(0);
+    const int depth = 5;
+
+    debug->moveGenTest(depth);
+    std::cout << std::endl;
+    debug->newMoveGenTest(depth);
     calculateLegalMoves(board);
     // Loop while the window shouldn't close
     while (!WindowShouldClose())

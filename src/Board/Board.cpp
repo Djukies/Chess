@@ -12,25 +12,21 @@ void replacePosToBitboards(Board* board, integer oldPos, integer newPos) {
     bit_board oldPosMask = 1ULL << oldPos;
     bit_board newPosMask = 1ULL << newPos;
 
+    bit_board mask = oldPosMask | newPosMask;
+
 
     if (oldPosMask & board->pawns) {
-        board->pawns &= ~oldPosMask;
-        board->pawns |= newPosMask;
+        board->pawns ^= mask;
     } else if (oldPosMask & board->knights) {
-        board->knights &= ~oldPosMask;
-        board->knights |= newPosMask;
+        board->knights ^= mask;
     } else if (oldPosMask & board->bishops) {
-        board->bishops &= ~oldPosMask;
-        board->bishops |= newPosMask;
+        board->bishops ^= mask;
     } else if (oldPosMask & board->rooks) {
-        board->rooks &= ~oldPosMask;
-        board->rooks |= newPosMask;
+        board->rooks ^= mask;
     } else if (oldPosMask & board->queens) {
-        board->queens &= ~oldPosMask;
-        board->queens |= newPosMask;
+        board->queens ^= mask;
     } else if (oldPosMask & board->kings) {
-        board->kings &= ~oldPosMask;
-        board->kings |= newPosMask;
+        board->kings ^= mask;
         if (oldPosMask & board->whitePieces) {
             board->whiteKingPos = newPos;
         } else if (oldPosMask & board->blackPieces) {
@@ -39,11 +35,9 @@ void replacePosToBitboards(Board* board, integer oldPos, integer newPos) {
     }
 
     if (oldPosMask & board->whitePieces) {
-        board->whitePieces &= ~oldPosMask;
-        board->whitePieces |= newPosMask;
+        board->whitePieces ^= mask;
     } else if (oldPosMask & board->blackPieces) {
-        board->blackPieces &= ~oldPosMask;
-        board->blackPieces |= newPosMask;
+        board->blackPieces ^= mask;
     }
 }
 
@@ -123,6 +117,70 @@ void makeMove(Board* board, Move move) {
 
     board->whiteToMove = !board->whiteToMove;
     board->fullMoves ++;
+}
+
+std::vector<MadeMove> movesMade = {};
+
+void makeSmallMove(Board* board, small_move move) {
+    board->enPassantSquare = 0;
+    integer startSquare = move & startSquareMask;
+    integer targetSquare = (move & targetSquareMask) >> 6;
+    int flag = ((move & flagMask) >> 12);
+    MadeMove madeMove;
+    switch (flag) {
+        case NoFlag:
+            if (containsSquare(board->blackPieces | board->whitePieces, targetSquare)) {
+                madeMove.captured = true;
+                madeMove.capturedPieceType = getPiece(board, targetSquare);
+                madeMove.capturePosPlace = targetSquare;
+                removeFromBitboards(board, targetSquare);
+            }
+            replacePosToBitboards(board, startSquare, targetSquare);
+            break;
+        case EnPassantCaptureFlag:
+            break;
+        case CastleFlag:
+            break;
+        case DoublePush:
+            replacePosToBitboards(board, startSquare, targetSquare);
+            board->enPassantSquare = targetSquare;
+            break;
+        default:
+            break;
+    }
+    board->whiteToMove = !board->whiteToMove;
+    board->fullMoves++;
+    movesMade.push_back(madeMove);
+}
+
+void unMakeSmallMove(Board* board, small_move move) {
+    integer targetSquare = move & startSquareMask;
+    integer startSquare = (move & targetSquareMask) >> 6;
+    int flag = ((move & flagMask) >> 12);
+    MadeMove moveToUnmake = movesMade[movesMade.size()-1];
+
+    switch (flag) {
+        case NoFlag:
+            replacePosToBitboards(board, startSquare, targetSquare);
+            if (moveToUnmake.captured) {
+                //CAPTURE
+                addToBitboards(board, moveToUnmake.capturePosPlace, moveToUnmake.capturedPieceType, board->whiteToMove);
+            }
+            break;
+        case EnPassantCaptureFlag:
+            break;
+        case CastleFlag:
+            break;
+        case DoublePush:
+            replacePosToBitboards(board, startSquare, targetSquare);
+            board->enPassantSquare = targetSquare;
+            break;
+        default:
+            break;
+    }
+    board->whiteToMove = !board->whiteToMove;
+    board->fullMoves--;
+    movesMade.pop_back();
 }
 
 void unmakeMove(Board* board, Move move) {

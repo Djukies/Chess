@@ -9,6 +9,7 @@ inline integer distanceToEdge[64][8];
 inline int directions[8] = {-8, 8, -1, 1, -9, 9, -7, 7};
 inline bit_board possibleKingMoves[64];
 inline bit_board possibleKnightMoves[64];
+inline bit_board rays[64][8];
 
 // Function to compute values
 inline void computeDistanceToEdge() {
@@ -64,10 +65,22 @@ inline void computeKnightMoves() {
     }
 }
 
+inline void computeRays() {
+    for (int pos = 0; pos < 64; pos++) {
+        for (int dir = 0; dir < 8; dir++) {
+            for (int i = 0; i <= distanceToEdge[pos][dir]; i++) {
+                rays[pos][dir] |= 1ULL << (pos + i*directions[dir]);
+            }
+        }
+    }
+}
+
 inline void precompute() {
     computeDistanceToEdge();
     computeKingMoves();
     computeKnightMoves();
+    computeRays();
+
 }
 
 #endif //CHESS_PRECOMPUTEDDATA_H

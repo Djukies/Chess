@@ -3,6 +3,9 @@
 #include <cstdint>
 #include "raylib.h"
 #include <iostream>
+#include <vector>
+#include <map>
+
 #define bit_board uint_fast64_t
 #define small_move uint16_t
 #define integer uint8_t
@@ -50,6 +53,12 @@ inline small_move create_move(integer startSquare, integer targetSquare, Flag fl
     return (startSquare | targetSquare << 6 | flag << 12);
 }
 
+struct MadeMove {
+    bool captured = false;
+    Piece capturedPieceType = NONE;
+    integer capturePosPlace = 0;
+};
+
 struct Move {
     integer prevEnPassantSquare = 0;
     Move_Type move_type = NO_MOVE;
@@ -89,6 +98,14 @@ struct Board {
     integer blackKingPos = 0;
     integer whiteKingPos = 0;
     integer friendlyKingPos = 0;
+    integer opponentKingPos = 0;
+    bit_board pinnedPieces = 0ULL;
+    bit_board checkRay = 0ULL;
+    bool inDoubleCheck = false;
+    bool inCheck = false;
+    bit_board opponentControlledSquares = 0ULL;
+    std::vector<small_move> movesVector = {};
+    std::map<integer, std::vector<small_move>> movesMap = {};
     uint8_t castleRights = 0;
     integer enPassantSquare = 0; // First bit says if enPassant is possible
     int halfMoves = 0;

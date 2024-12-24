@@ -51,5 +51,15 @@ inline bool containsSquare(bit_board bitboard, integer square)
     return ((bitboard >> square) & 1) != 0;
 }
 
+inline Piece getPiece(Board* board, integer square) {
+    if (containsSquare(board->pawns, square)) return PAWN;
+    if (containsSquare(board->bishops, square)) return BISHOP;
+    if (containsSquare(board->knights, square)) return KNIGHT;
+    if (containsSquare(board->rooks, square)) return ROOK;
+    if (containsSquare(board->queens, square)) return QUEEN;
+    if (containsSquare(board->kings, square)) return KING;
+    return NONE;
+}
+
 
 #endif //CHESS_BITBOARDUTILITY_H

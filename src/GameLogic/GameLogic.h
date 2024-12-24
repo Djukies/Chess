@@ -22,6 +22,20 @@ inline Move getMove(integer oldPos, integer newPos, std::map<integer, std::vecto
     return {NO_MOVE};
 }
 
+inline small_move getSmallMove(integer oldPos, integer newPos, std::map<integer, std::vector<small_move>> moves) {
+    auto it = moves.find(oldPos); // Check if oldPos exists in the moves (Used to check if it is part of the right team for example)
+
+    if (it != moves.end()) {
+        auto found = std::find_if(it->second.begin(), it->second.end(), [newPos, oldPos](const small_move &move) {
+            return (move & startSquareMask) == oldPos && ((move & targetSquareMask) >> 6) == newPos;
+        });
+        if (found != it->second.end()) {
+            return *found;
+        }
+    }
+    return 0;
+}
+
 class GameLogic {
 private:
     Board* board;
@@ -38,9 +52,9 @@ public:
     explicit GameLogic(Board* board);
     void undoMoves();
     bool tryMove(integer oldPos, integer newPos);
-
-    std::vector<Move> madeMoves = {};
-    std::map<integer, std::vector<Move>> moves = calculateMoves();
+    std::map<integer, std::vector<small_move>> moveVectorToMap(std::vector<small_move> moves);
+    std::vector<small_move> madeMoves = {};
+    std::map<integer, std::vector<Move>> moves;
     std::map<integer, std::vector<Move>> calculateMoves(bool onlyLegalMoves = true);
 };
 

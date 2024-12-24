@@ -6,6 +6,7 @@
 #include <iomanip>
 #include "../GameLogic/Bitboard Utility/BitboardUtility.h"
 #include "../GameLogic/Precomputed Data/PrecomputedData.h"
+#include "../GameLogic/MoveGeneration/MoveGeneration.h"
 #include "../Types.h"
 #include "../Renderer/Renderer.h"
 
@@ -20,10 +21,14 @@ private:
     GameLogic* gameLogic;
     void showBitBoards();
     int currentBitBoard = 0;
+
+    int currentSquare = 0;
+    int currentDir = 0;
 public:
     Debug(Renderer* renderer, Board* board, GameLogic* gameLogic);
     void debugAll();
     void moveGenTest(int depth);
+    void newMoveGenTest(int depth);
     std::vector<bit_board> bitBoards = {};
 };
 

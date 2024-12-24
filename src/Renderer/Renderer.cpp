@@ -33,20 +33,21 @@ void Renderer::drawBoard() {
 }
 
 void Renderer::drawMoves() {
-    bit_board activePieceMask = 1ULL << activePiece;
-    bit_board teamBitboard = board->whiteToMove == TEAMWHITE ? board->whitePieces : board->blackPieces;
-    if (activePieceMask & teamBitboard) {
-        for (Move move : gameLogic->moves[activePiece]) {
-            bool shouldHaveSmallCircle = move.move_type == NORMAL_MOVE || move.move_type == DOUBLE_PAWN_PUSH;
-            if (vector2ScreenToInt(GetMousePosition(), squareSize) != move.newPos) {
-                DrawRing({intToVector2ScreenPos(move.newPos, squareSize).x + (float)squareSize / 2,
-                          intToVector2ScreenPos(move.newPos, squareSize).y + (float)squareSize / 2},
+    if (containsSquare(board->friendlyPieces, activePiece)) {
+
+
+        for (small_move move : board->movesMap[activePiece]) {
+            int newPos = (move & targetSquareMask) >> 6;
+            bool shouldHaveSmallCircle = containsSquare(board->emptySquares, newPos);
+            if (vector2ScreenToInt(GetMousePosition(), squareSize) != newPos) {
+                DrawRing({intToVector2ScreenPos(newPos, squareSize).x + (float)squareSize / 2,
+                          intToVector2ScreenPos(newPos, squareSize).y + (float)squareSize / 2},
                          shouldHaveSmallCircle ? 0 : 0.4f * (float)squareSize, shouldHaveSmallCircle ? 0.2f * (float)squareSize : 0.5f * (float)squareSize,
                          0, 360, 0, MOVECOLOR);
             }
             else {
-                DrawCircle((int)intToVector2ScreenPos(move.newPos, squareSize).x + squareSize / 2,
-                           (int)intToVector2ScreenPos(move.newPos, squareSize).y + squareSize / 2,
+                DrawCircle((int)intToVector2ScreenPos(newPos, squareSize).x + squareSize / 2,
+                           (int)intToVector2ScreenPos(newPos, squareSize).y + squareSize / 2,
                            shouldHaveSmallCircle ? 0.25f * (float)squareSize : 0.5f * (float)squareSize, MOVECOLOR);
             }
         }
