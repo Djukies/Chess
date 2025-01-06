@@ -359,26 +359,5 @@ std::vector<Move> calculateLegalMoves(Board* board) {
         moves.insert(moves.end(), knightMoves.begin(), knightMoves.end());
         moves.insert(moves.end(), sliderMoves.begin(), sliderMoves.end());
     }
-    /*std::cout << "ALLMOVES" << std::endl;
-    for (Move Move : moves) {
-        std::cout << "Start: " << (int)(Move & startSquareMask) << ", End: " << (int)((Move & targetSquareMask) >> 6) << ", Flags: " << (int)((Move & flagMask) >> 12) << std::endl;
-    }
-    std::cout << "PAWNS:" << std::endl;
-    for (Move Move : calculatePawnMoves(board)) {
-        std::cout << "Start: " << (int)(Move & startSquareMask) << ", End: " << (int)((Move & targetSquareMask) >> 6) << ", Flags: " << (int)((Move & flagMask) >> 12) << std::endl;
-    }
-    std::cout << "KINGS:" << std::endl;
-    for (Move Move : kingMoves) {
-        std::cout << "Start: " << (int)(Move & startSquareMask) << ", End: " << (int)((Move & targetSquareMask) >> 6) << ", Flags: " << (int)((Move & flagMask) >> 12) << std::endl;
-    }
-    std::cout << "KNIGHTS:" << std::endl;
-    for (Move Move : knightMoves) {
-        std::cout << "Start: " << (int)(Move & startSquareMask) << ", End: " << (int)((Move & targetSquareMask) >> 6) << ", Flags: " << (int)((Move & flagMask) >> 12) << std::endl;
-    }
-    std::cout << "SLIDERS" << std::endl;
-    for (Move Move : sliderMoves) {
-        std::cout << "Start: " << (int)(Move & startSquareMask) << ", End: " << (int)((Move & targetSquareMask) >> 6) << ", Flags: " << (int)((Move & flagMask) >> 12) << std::endl;
-    }
-    std::cout << "Amount Of Moves: " << moves.size() << std::endl;*/
     return moves;
 }

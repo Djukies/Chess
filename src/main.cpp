@@ -37,7 +37,7 @@ int main() {
     const int depth = 4;
 
     std::cout << std::endl;
-    debug->newMoveGenTest(depth);
+    debug->moveGenTest(depth);
     calculateLegalMoves(board);
     // Loop while the window shouldn't close
     while (!WindowShouldClose())

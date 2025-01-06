@@ -13,7 +13,7 @@
 
 Board* loadBoardFromFEN(const std::string fen);
 
-void makeSmallMove(Board* board, Move Move);
-void unMakeSmallMove(Board* board, Move Move);
+void makeMove(Board* board, Move move);
+void unMakeMove(Board* board, Move move);
 
 #endif //CHESS_BOARD_H

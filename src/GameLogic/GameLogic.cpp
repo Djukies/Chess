@@ -11,13 +11,13 @@ void GameLogic::undoMoves() {
             if (board->fullMoves - firstMadMove <= 0) {
                 return;
             }
-            unMakeSmallMove(board, madeMoves[board->fullMoves - firstMadMove - 1]);
+            unMakeMove(board, madeMoves[board->fullMoves - firstMadMove - 1]);
             board->movesVector = calculateLegalMoves(board);
             board->movesMap = moveVectorToMap(board->movesVector);
         } else if (IsKeyPressed(KEY_RIGHT)) {
             if (board->fullMoves - firstMadMove < madeMoves.size()) {
-                Move Move = madeMoves[board->fullMoves - firstMadMove];
-                makeSmallMove(board, Move);
+                Move move = madeMoves[board->fullMoves - firstMadMove];
+                makeMove(board, move);
                 board->movesVector = calculateLegalMoves(board);
                 board->movesMap = moveVectorToMap(board->movesVector);
             }
@@ -29,7 +29,7 @@ void GameLogic::undoMoves() {
 bool GameLogic::tryMove(uint8_t oldPos, uint8_t newPos) {
     Move smallMove = getSmallMove(oldPos, newPos, board->movesMap);
     if (smallMove != 0) {
-        makeSmallMove(board, smallMove);
+        makeMove(board, smallMove);
 
         board->movesVector = calculateLegalMoves(board);
         board->movesMap = moveVectorToMap(board->movesVector);
@@ -53,8 +53,8 @@ bool GameLogic::tryMove(uint8_t oldPos, uint8_t newPos) {
 std::map<integer, std::vector<Move>> GameLogic::moveVectorToMap(std::vector<Move> movesToRework) {
     std::map<integer, std::vector<Move>> movesToReturn;
 
-    for (Move Move : movesToRework) {
-        movesToReturn[Move & startSquareMask].push_back(Move);
+    for (Move move : movesToRework) {
+        movesToReturn[move & startSquareMask].push_back(move);
     }
 
     return movesToReturn;

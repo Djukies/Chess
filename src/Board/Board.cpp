@@ -86,10 +86,10 @@ void addToBitboards(Board* board, integer pos, Piece pieceType, bool team) {
 
 std::vector<MadeMove> movesMade = {};
 
-void makeSmallMove(Board* board, Move Move) {
-    integer startSquare = Move & startSquareMask;
-    integer targetSquare = (Move & targetSquareMask) >> 6;
-    int flag = ((Move & flagMask) >> 12);
+void makeMove(Board* board, Move move) {
+    integer startSquare = move & startSquareMask;
+    integer targetSquare = (move & targetSquareMask) >> 6;
+    int flag = ((move & flagMask) >> 12);
     MadeMove madeMove;
     madeMove.prevEnPassant = board->enPassantSquare;
     board->enPassantSquare = 0;
@@ -125,10 +125,10 @@ void makeSmallMove(Board* board, Move Move) {
     movesMade.push_back(madeMove);
 }
 
-void unMakeSmallMove(Board* board, Move Move) {
-    integer targetSquare = Move & startSquareMask;
-    integer startSquare = (Move & targetSquareMask) >> 6;
-    int flag = ((Move & flagMask) >> 12);
+void unMakeMove(Board* board, Move move) {
+    integer targetSquare = move & startSquareMask;
+    integer startSquare = (move & targetSquareMask) >> 6;
+    int flag = ((move & flagMask) >> 12);
     MadeMove moveToUnmake = movesMade[movesMade.size()-1];
     board->enPassantSquare = moveToUnmake.prevEnPassant;
     switch (flag) {

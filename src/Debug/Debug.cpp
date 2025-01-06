@@ -81,38 +81,29 @@ char intToChar(int x) {
     switch (x) {
         case 0:
             return 'a';
-            break;
         case 1:
             return 'b';
-            break;
         case 2:
             return 'c';
-            break;
         case 3:
             return 'd';
-            break;
         case 4:
             return 'e';
-            break;
         case 5:
             return 'f';
-            break;
         case 6:
             return 'g';
-            break;
         case 7:
             return 'h';
-            break;
         default:
             return 'z';
-            break;
     }
 }
 
 double moveCount = 0;
 int captures = 0;
 int enPassants = 0;
-void NewMoveGenerationTest(Board* board, const int depth)
+void MoveGenerationTest(Board* board, const int depth)
 {
 
     if (depth == 0)
@@ -123,9 +114,9 @@ void NewMoveGenerationTest(Board* board, const int depth)
 
     if (depth == 1) {
         moveCount += (double) moves.size();
-        for (Move Move : moves) {
-            if (containsSquare(board->whitePieces | board->blackPieces, (Move & targetSquareMask) >> 6)) {captures++;}
-            if (((Move & flagMask) >> 12) == EnPassantCaptureFlag) {
+        for (Move move : moves) {
+            if (containsSquare(board->whitePieces | board->blackPieces, (move & targetSquareMask) >> 6)) {captures++;}
+            if (((move & flagMask) >> 12) == EnPassantCaptureFlag) {
 
                 captures++;
                 enPassants++;
@@ -133,7 +124,7 @@ void NewMoveGenerationTest(Board* board, const int depth)
         }
         return;
     }
-    for (const Move Move : moves)
+    for (const Move move : moves)
     {
         //moveList.push_back(Move);
         /*Board boardDupe = createBoardDupe(board);
@@ -142,9 +133,9 @@ void NewMoveGenerationTest(Board* board, const int depth)
             findDifference(boardDupe, board);
             std::cout << std::endl;
         }*/
-        makeSmallMove(board, Move);
-        NewMoveGenerationTest(board, depth - 1);
-        unMakeSmallMove(board, Move);
+        makeMove(board, move);
+        MoveGenerationTest(board, depth - 1);
+        unMakeMove(board, move);
         /*if (!isSame(boardDupe, board)) {
             if (true) {
                 std::cout << "Is different after MAKE/UNMAKE";
@@ -161,13 +152,13 @@ void NewMoveGenerationTest(Board* board, const int depth)
     }
 }
 
-void Debug::newMoveGenTest(int depth) {
+void Debug::moveGenTest(int depth) {
     for (int checkDepth = 0; checkDepth <= depth; checkDepth++) {
         moveCount = 0;
         captures = 0;
         enPassants = 0;
         const auto start = std::chrono::high_resolution_clock::now();
-        NewMoveGenerationTest(board, checkDepth);
+        MoveGenerationTest(board, checkDepth);
         const auto end = std::chrono::high_resolution_clock::now();
         const auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
         std::cout << "Depth: " << checkDepth << ", Moves: " << std::fixed << std::setprecision(0) << moveCount << ", Time taken: " << time.count() << "ms" << " (Captures: " << captures << ", En Passants: " << enPassants << ")" << std::endl;    }

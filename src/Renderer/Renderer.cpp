@@ -36,8 +36,8 @@ void Renderer::drawMoves() {
     if (containsSquare(board->friendlyPieces, activePiece)) {
 
 
-        for (Move Move : board->movesMap[activePiece]) {
-            int newPos = (Move & targetSquareMask) >> 6;
+        for (Move move : board->movesMap[activePiece]) {
+            int newPos = (move & targetSquareMask) >> 6;
             bool shouldHaveSmallCircle = containsSquare(board->emptySquares, newPos);
             if (vector2ScreenToInt(GetMousePosition(), squareSize) != newPos) {
                 DrawRing({intToVector2ScreenPos(newPos, squareSize).x + (float)squareSize / 2,

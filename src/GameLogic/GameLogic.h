@@ -9,12 +9,12 @@
 #include <chrono>
 
 
-inline Move getSmallMove(integer oldPos, integer newPos, std::map<integer, std::vector<Move>> moves) {
+inline Move getMove(integer oldPos, integer newPos, std::map<integer, std::vector<Move>> moves) {
     auto it = moves.find(oldPos); // Check if oldPos exists in the moves (Used to check if it is part of the right team for example)
 
     if (it != moves.end()) {
-        auto found = std::find_if(it->second.begin(), it->second.end(), [newPos, oldPos](const Move &Move) {
-            return (Move & startSquareMask) == oldPos && ((Move & targetSquareMask) >> 6) == newPos;
+        auto found = std::find_if(it->second.begin(), it->second.end(), [newPos, oldPos](const Move &move) {
+            return (move & startSquareMask) == oldPos && ((move & targetSquareMask) >> 6) == newPos;
         });
         if (found != it->second.end()) {
             return *found;
