@@ -1,29 +1,36 @@
 #include "MoveGeneration.h"
 
-void generatePromotions(integer startSquare, integer targetSquare, std::vector<small_move>& moves) {
+bool isPinned(Board* board, integer piece) {
+    return containsSquare(board->pinnedPieces, piece);
+}
+
+void generatePromotions(integer startSquare, integer targetSquare, std::vector<Move>& moves) {
     moves.push_back(create_move(startSquare, targetSquare, PromoteToBishopFlag));
     moves.push_back(create_move(startSquare, targetSquare, PromoteToKnightFlag));
     moves.push_back(create_move(startSquare, targetSquare, PromoteToQueenFlag));
     moves.push_back(create_move(startSquare, targetSquare, PromoteToRookFlag));
 }
 
-std::vector<small_move> calculatePawnMoves(Board* board) {
-    std::vector<small_move> moves;
+std::vector<Move> calculatePawnMoves(Board* board) {
+    std::vector<Move> moves;
     bit_board pawns = board->pawns & board->friendlyPieces;
-    int pushDir = board->whiteToMove ? 1 : -1;
+    int pushDir = board->whiteToMove ? -1 : 1;
 
-    bit_board promotionRankMask = board->whiteToMove ? rank8 : rank1;
+    bit_board promotionRankMask = board->whiteToMove ? rank1 : rank8;
     bit_board singlePush = shift(pawns, pushDir*8) & board->emptySquares;
 
-    bit_board doublePushTargetRank = board->whiteToMove ? rank4 : rank5;
+    bit_board doublePushTargetRank = board->whiteToMove ? rank5 : rank4;
     bit_board doublePush = shift(singlePush, pushDir*8) & doublePushTargetRank & board->emptySquares & board->checkRay;
     bit_board singlePushNoPromotions = singlePush & ~promotionRankMask & board->checkRay;
     bit_board pushPromotions = singlePush & promotionRankMask;
 
-    bit_board captureEdgePreventionMask1 = board->whiteToMove ? notFileA : notFileH;
-    bit_board captureEdgePreventionMask2 = board->whiteToMove ? notFileH : notFileA;
-    bit_board captureA = shift(pawns & captureEdgePreventionMask1, pushDir * 7) & board->enemyPieces & board->checkRay;
-    bit_board captureB = shift(pawns & captureEdgePreventionMask2, pushDir * 9) & board->enemyPieces & board->checkRay;
+    bit_board captureEdgePreventionMask1 = board->whiteToMove ? notFileH : notFileA;
+    bit_board captureEdgePreventionMask2 = board->whiteToMove ? notFileA : notFileH;
+
+    bit_board enPassantSquare = 1ULL << (board->enPassantSquare + 8*pushDir);
+
+    bit_board captureA = shift(pawns & captureEdgePreventionMask1, pushDir * 7) & (board->enemyPieces | enPassantSquare) & board->checkRay;
+    bit_board captureB = shift(pawns & captureEdgePreventionMask2, pushDir * 9) & (board->enemyPieces | enPassantSquare) & board->checkRay;
 
     bit_board capturePromotionsA = captureA & promotionRankMask;
     bit_board capturePromotionsB = captureB & promotionRankMask;
@@ -31,74 +38,99 @@ std::vector<small_move> calculatePawnMoves(Board* board) {
     captureA &= ~promotionRankMask;
     captureB &= ~promotionRankMask;
 
+
     while (singlePushNoPromotions != 0) {
         int targetSquare = getIndex(singlePushNoPromotions);
         singlePushNoPromotions &= singlePushNoPromotions-1;
         int startSquare = targetSquare - pushDir*8;
-        moves.push_back(create_move(startSquare, targetSquare));
+        if (!isPinned(board, startSquare) || getRays(board->friendlyKingPos, startSquare) == getRays(board->friendlyKingPos, targetSquare)) {
+            moves.push_back(create_move(startSquare, targetSquare));
+        }
     }
     while (doublePush != 0) {
         int targetSquare = getIndex(doublePush);
         doublePush &= doublePush-1;
         int startSquare = targetSquare - pushDir*16;
-        moves.push_back(create_move(startSquare, targetSquare, DoublePush));
+        if (!isPinned(board, startSquare) || getRays(board->friendlyKingPos, startSquare) == getRays(board->friendlyKingPos, targetSquare)) {
+            moves.push_back(create_move(startSquare, targetSquare, DoublePush));
+        }
     }
     while (captureA != 0) {
         int targetSquare = getIndex(captureA);
         captureA &= captureA-1;
         int startSquare = targetSquare - pushDir*7;
-        moves.push_back(create_move(startSquare, targetSquare));
+        if (!isPinned(board, startSquare) || getRays(board->friendlyKingPos, startSquare) == getRays(board->friendlyKingPos, targetSquare)) {
+            if (targetSquare == board->enPassantSquare + 8*pushDir) {
+                moves.push_back(create_move(startSquare, targetSquare, EnPassantCaptureFlag));
+            } else {
+                moves.push_back(create_move(startSquare, targetSquare));
+            }
+        }
     }
     while (captureB != 0) {
         int targetSquare = getIndex(captureB);
         captureB &= captureB-1;
         int startSquare = targetSquare - pushDir*9;
-        moves.push_back(create_move(startSquare, targetSquare));
+        if (!isPinned(board, startSquare) || getRays(board->friendlyKingPos, startSquare) == getRays(board->friendlyKingPos, targetSquare)) {
+            if (targetSquare == board->enPassantSquare + 8*pushDir) {
+                moves.push_back(create_move(startSquare, targetSquare, EnPassantCaptureFlag));
+            } else {
+                moves.push_back(create_move(startSquare, targetSquare));
+            }
+        }
     }
     while (pushPromotions != 0) {
         int targetSquare = getIndex(pushPromotions);
         pushPromotions &= pushPromotions-1;
         int startSquare = targetSquare - pushDir*8;
-        generatePromotions(startSquare, targetSquare, moves);
+        if (!isPinned(board, startSquare)) {
+            generatePromotions(startSquare, targetSquare, moves);
+        }
     }
     while (capturePromotionsA != 0) {
         int targetSquare = getIndex(capturePromotionsA);
         capturePromotionsA &= capturePromotionsA-1;
         int startSquare = targetSquare - pushDir*8;
-        generatePromotions(startSquare, targetSquare, moves);
+        if (!isPinned(board, startSquare) || getRays(board->friendlyKingPos, startSquare) == getRays(board->friendlyKingPos, targetSquare)) {
+            generatePromotions(startSquare, targetSquare, moves);
+        }
     }
     while (capturePromotionsB != 0) {
         int targetSquare = getIndex(capturePromotionsB);
         capturePromotionsB &= capturePromotionsB-1;
         int startSquare = targetSquare - pushDir*8;
-        generatePromotions(startSquare, targetSquare, moves);
+        if (!isPinned(board, startSquare) || getRays(board->friendlyKingPos, startSquare) == getRays(board->friendlyKingPos, targetSquare)) {
+            generatePromotions(startSquare, targetSquare, moves);
+        }
     }
 
     return moves;
 }
 
-std::vector<small_move> calculateKnightMoves(Board* board) {
-    std::vector<small_move> moves;
+std::vector<Move> calculateKnightMoves(Board* board) {
+    std::vector<Move> moves;
     bit_board knights = board->knights & board->friendlyPieces;
     while (knights != 0) {
         integer startSquare = getIndex(knights);
         knights &= knights-1;
-        if (containsSquare(board->pinnedPieces, startSquare)) {
-            continue;
-        }
-        bit_board possibleMoves = possibleKnightMoves[startSquare] & (board->emptySquares | board->enemyPieces) & board->checkRay;
-        while (possibleMoves != 0) {
-            integer targetSquare = getIndex(possibleMoves);
-            possibleMoves &= possibleMoves - 1;
-            moves.push_back(create_move(startSquare, targetSquare));
+        if (!isPinned(board, startSquare)) { // If knight is pinned, it will never be able to Move
+            if (containsSquare(board->pinnedPieces, startSquare)) {
+                continue;
+            }
+            bit_board possibleMoves = possibleKnightMoves[startSquare] & (board->emptySquares | board->enemyPieces) & board->checkRay;
+            while (possibleMoves != 0) {
+                integer targetSquare = getIndex(possibleMoves);
+                possibleMoves &= possibleMoves - 1;
+                moves.push_back(create_move(startSquare, targetSquare));
+            }
         }
     }
 
     return moves;
 }
 
-std::vector<small_move> calculateKingMoves(Board* board) {
-    std::vector<small_move> moves;
+std::vector<Move> calculateKingMoves(Board* board) {
+    std::vector<Move> moves;
     bit_board possibleMoves = possibleKingMoves[board->friendlyKingPos] & (board->emptySquares | board->enemyPieces) & (~board->opponentControlledSquares);
     while (possibleMoves != 0) {
         integer targetSquare = getIndex(possibleMoves);
@@ -109,19 +141,19 @@ std::vector<small_move> calculateKingMoves(Board* board) {
     return moves;
 }
 
-std::vector<small_move> calculateSlidingMoves(Board* board, integer pos, int startDir, int endDir) {
-    std::vector<small_move> moves;
+std::vector<Move> calculateSlidingMoves(Board* board, integer pos, int startDir, int endDir) {
+    std::vector<Move> moves;
     for (int dir = startDir; dir < endDir; dir++) {
         for (int distance = 1; distance <= distanceToEdge[pos][dir]; distance++) {
             if (containsSquare(board->allPieces, pos + directions[dir] * distance)) {
                 if (containsSquare(board->enemyPieces, pos + directions[dir] * distance)) {
-                    if (containsSquare(board->checkRay, pos + directions[dir]*distance)) {
+                    if (containsSquare(board->checkRay, pos + directions[dir]*distance) && (!isPinned(board, pos) || getRays(board->friendlyKingPos, pos) == getRays(board->friendlyKingPos, pos + directions[dir] * distance))) {
                         moves.push_back(create_move(pos, pos + directions[dir] * distance));
                     }
                 }
                 break;
             }
-            if (containsSquare(board->checkRay, pos + directions[dir]*distance)) {
+            if (containsSquare(board->checkRay, pos + directions[dir]*distance) && (!isPinned(board, pos) || getRays(board->friendlyKingPos, pos) == getRays(board->friendlyKingPos, pos + directions[dir] * distance))) {
                 moves.push_back(create_move(pos, pos + directions[dir] * distance));
             }
         }
@@ -130,21 +162,21 @@ std::vector<small_move> calculateSlidingMoves(Board* board, integer pos, int sta
     return moves;
 }
 
-std::vector<small_move> calculateSlidingPieceMoves(Board* board) {
-    std::vector<small_move> moves;
+std::vector<Move> calculateSlidingPieceMoves(Board* board) {
+    std::vector<Move> moves;
     bit_board diagonalSliders = board->friendlyPieces & (board->bishops | board->queens);
     bit_board othogonalSliders = board->friendlyPieces & (board->rooks | board->queens);
 
     while (diagonalSliders != 0) {
         int startSquare = getIndex(diagonalSliders);
         diagonalSliders &= diagonalSliders-1;
-        std::vector<small_move> movesOfPiece = calculateSlidingMoves(board, startSquare, 4, 8);
+        std::vector<Move> movesOfPiece = calculateSlidingMoves(board, startSquare, 4, 8);
         moves.insert(moves.end(), movesOfPiece.begin(), movesOfPiece.end());
     }
     while (othogonalSliders != 0) {
         int startSquare = getIndex(othogonalSliders);
         othogonalSliders &= othogonalSliders-1;
-        std::vector<small_move> movesOfPiece = calculateSlidingMoves(board, startSquare, 0, 4);
+        std::vector<Move> movesOfPiece = calculateSlidingMoves(board, startSquare, 0, 4);
         moves.insert(moves.end(), movesOfPiece.begin(), movesOfPiece.end());
     }
 
@@ -200,9 +232,9 @@ bit_board calculatePawnAttacks(bit_board pawns, bool isWhiteToMove) {
 void calculateAttackData(Board* board) {
     int startIndex = 0;
     int endIndex = 8;
-    if (board->queens == 0) {
-        startIndex = board->rooks == 0 ? 4 : 8;
-        endIndex = board->bishops == 0 ? 8 : 4;
+    if ((board->queens & board->enemyPieces) == 0) {
+        startIndex = (board->rooks & board->enemyPieces) == 0 ? 4 : 0;
+        endIndex = (board->bishops & board->enemyPieces) == 0 ? 8 : 4;
     }
     for (int dir = startIndex; dir < endIndex; dir++) {
         bool isDiagonal = dir >= 4;
@@ -243,9 +275,14 @@ void calculateAttackData(Board* board) {
         }
         if (board->inDoubleCheck) {
             break;
-            // If in double check, only the king can move, so the pinned pieces don't matter
+            // If in double check, only the king can Move, so the pinned pieces don't matter
         }
     }
+
+    // Calculate all the attack Possibilities
+    // First remove the king, so it can't hide behind himself
+    board->allPieces &= ~(1ULL << board->friendlyKingPos);
+
     bit_board opponentSlidingPieceAttacks = calculateSlidingPieceMovesAttackMap(board);
 
     bit_board friendlyKingMask = 1ULL << board->friendlyKingPos;
@@ -276,10 +313,11 @@ void calculateAttackData(Board* board) {
     bit_board opponentKingAttacks = possibleKingMoves[board->opponentKingPos];
 
     board->opponentControlledSquares = opponentKnightAttacks | opponentSlidingPieceAttacks | opponentKingAttacks | pawnAttacks;
+    // Add the king back at the end
+    board->allPieces |= 1ULL << board->friendlyKingPos;
+
     if (!board->inCheck) {
-        board->checkRay = UINT64_MAX; // Can only move on places to block check, so if no check pieces can move everywhere
-    } else {
-        board->checkRay |= 0ULL;
+        board->checkRay = UINT64_MAX; // Can only Move on places to block check, so if no check pieces can Move everywhere
     }
 }
 
@@ -306,40 +344,40 @@ void init(Board* board) {
     calculateAttackData(board);
 }
 
-std::vector<small_move> calculateLegalMoves(Board* board) {
-    std::vector<small_move> moves;
+std::vector<Move> calculateLegalMoves(Board* board) {
+    std::vector<Move> moves;
     init(board);
 
-    std::vector<small_move> kingMoves = calculateKingMoves(board);
+    std::vector<Move> kingMoves = calculateKingMoves(board);
     moves.insert(moves.end(), kingMoves.begin(), kingMoves.end());
     if (!board->inDoubleCheck) {
-        std::vector<small_move> pawnMoves = calculatePawnMoves(board);
-        std::vector<small_move> knightMoves = calculateKnightMoves(board);
-        std::vector<small_move> sliderMoves = calculateSlidingPieceMoves(board);
+        std::vector<Move> pawnMoves = calculatePawnMoves(board);
+        std::vector<Move> knightMoves = calculateKnightMoves(board);
+        std::vector<Move> sliderMoves = calculateSlidingPieceMoves(board);
 
         moves.insert(moves.end(), pawnMoves.begin(), pawnMoves.end());
         moves.insert(moves.end(), knightMoves.begin(), knightMoves.end());
         moves.insert(moves.end(), sliderMoves.begin(), sliderMoves.end());
     }
     /*std::cout << "ALLMOVES" << std::endl;
-    for (small_move move : moves) {
-        std::cout << "Start: " << (int)(move & startSquareMask) << ", End: " << (int)((move & targetSquareMask) >> 6) << ", Flags: " << (int)((move & flagMask) >> 12) << std::endl;
+    for (Move Move : moves) {
+        std::cout << "Start: " << (int)(Move & startSquareMask) << ", End: " << (int)((Move & targetSquareMask) >> 6) << ", Flags: " << (int)((Move & flagMask) >> 12) << std::endl;
     }
     std::cout << "PAWNS:" << std::endl;
-    for (small_move move : calculatePawnMoves(board)) {
-        std::cout << "Start: " << (int)(move & startSquareMask) << ", End: " << (int)((move & targetSquareMask) >> 6) << ", Flags: " << (int)((move & flagMask) >> 12) << std::endl;
+    for (Move Move : calculatePawnMoves(board)) {
+        std::cout << "Start: " << (int)(Move & startSquareMask) << ", End: " << (int)((Move & targetSquareMask) >> 6) << ", Flags: " << (int)((Move & flagMask) >> 12) << std::endl;
     }
     std::cout << "KINGS:" << std::endl;
-    for (small_move move : kingMoves) {
-        std::cout << "Start: " << (int)(move & startSquareMask) << ", End: " << (int)((move & targetSquareMask) >> 6) << ", Flags: " << (int)((move & flagMask) >> 12) << std::endl;
+    for (Move Move : kingMoves) {
+        std::cout << "Start: " << (int)(Move & startSquareMask) << ", End: " << (int)((Move & targetSquareMask) >> 6) << ", Flags: " << (int)((Move & flagMask) >> 12) << std::endl;
     }
     std::cout << "KNIGHTS:" << std::endl;
-    for (small_move move : knightMoves) {
-        std::cout << "Start: " << (int)(move & startSquareMask) << ", End: " << (int)((move & targetSquareMask) >> 6) << ", Flags: " << (int)((move & flagMask) >> 12) << std::endl;
+    for (Move Move : knightMoves) {
+        std::cout << "Start: " << (int)(Move & startSquareMask) << ", End: " << (int)((Move & targetSquareMask) >> 6) << ", Flags: " << (int)((Move & flagMask) >> 12) << std::endl;
     }
     std::cout << "SLIDERS" << std::endl;
-    for (small_move move : sliderMoves) {
-        std::cout << "Start: " << (int)(move & startSquareMask) << ", End: " << (int)((move & targetSquareMask) >> 6) << ", Flags: " << (int)((move & flagMask) >> 12) << std::endl;
+    for (Move Move : sliderMoves) {
+        std::cout << "Start: " << (int)(Move & startSquareMask) << ", End: " << (int)((Move & targetSquareMask) >> 6) << ", Flags: " << (int)((Move & flagMask) >> 12) << std::endl;
     }
     std::cout << "Amount Of Moves: " << moves.size() << std::endl;*/
     return moves;

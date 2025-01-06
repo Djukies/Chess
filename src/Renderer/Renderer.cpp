@@ -36,8 +36,8 @@ void Renderer::drawMoves() {
     if (containsSquare(board->friendlyPieces, activePiece)) {
 
 
-        for (small_move move : board->movesMap[activePiece]) {
-            int newPos = (move & targetSquareMask) >> 6;
+        for (Move Move : board->movesMap[activePiece]) {
+            int newPos = (Move & targetSquareMask) >> 6;
             bool shouldHaveSmallCircle = containsSquare(board->emptySquares, newPos);
             if (vector2ScreenToInt(GetMousePosition(), squareSize) != newPos) {
                 DrawRing({intToVector2ScreenPos(newPos, squareSize).x + (float)squareSize / 2,
@@ -112,7 +112,7 @@ void Renderer::onClick() {
     // Check if there already is an active piece
     if (pieceActive) {
         pieceActive = false;
-        if (!gameLogic->tryMove(activePiece, clickedSquare)) { // Check if you can make a move to the clicked square (if not do next code (also you can't if it is its own square))
+        if (!gameLogic->tryMove(activePiece, clickedSquare)) { // Check if you can make a Move to the clicked square (if not do next code (also you can't if it is its own square))
             if (clickMask & (board->whitePieces | board->blackPieces)) { // If clicked on a piece (not air)
                 activePiece = clickedSquare;
                 pieceActive = true;
@@ -145,7 +145,7 @@ void Renderer::onMouseDown() {
 }
 
 void Renderer::onMouseReleased() {
-    // Try to make the move
+    // Try to make the Move
     if (pieceActive) {
         gameLogic->tryMove(activePiece, vector2ScreenToInt(GetMousePosition(), squareSize));
     }

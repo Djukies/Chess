@@ -20,24 +20,22 @@ int main() {
     SetWindowMinSize(300, 300);
 
     // Set up the Board
-    std::string FEN = "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr w KQkq - 0 10";//RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr w KQkq - 0 10
+    std::string FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";//rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
     Board* board = loadBoardFromFEN(FEN);
     // Set up the classes
     auto* gameLogic = new GameLogic(board);
     auto* renderer = new Renderer(board, gameLogic);
     auto* debug = new Debug(renderer, board, gameLogic);
 
-    // Set the moves at beginning (rest will automatic after move)
+    // Set the moves at beginning (rest will automatic after Move)
     precompute();
     board->movesVector = calculateLegalMoves(board);
     board->movesMap = gameLogic->moveVectorToMap(board->movesVector);
 
 
-    gameLogic->moves = gameLogic->calculateMoves();
     // Test the moveGen (prints the amount of moves at every depth till depth:)
-    const int depth = 5;
+    const int depth = 4;
 
-    debug->moveGenTest(depth);
     std::cout << std::endl;
     debug->newMoveGenTest(depth);
     calculateLegalMoves(board);

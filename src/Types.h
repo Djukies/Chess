@@ -7,21 +7,11 @@
 #include <map>
 
 #define bit_board uint_fast64_t
-#define small_move uint16_t
+#define Move uint16_t
 #define integer uint8_t
 #define TEAMWHITE true
 #define TEAMBLACK false
 
-enum Move_Type {
-    NO_MOVE,
-    NORMAL_MOVE,
-    DOUBLE_PAWN_PUSH,
-    CAPTURE,
-    PROMOTION,
-    CAPTURE_PROMOTION,
-    EN_PASSANT,
-    CASTLE
-};
 
 enum Piece {
     PAWN,
@@ -45,11 +35,11 @@ enum Flag {
     PromoteToBishopFlag,
 };
 
-const small_move startSquareMask = 0b0000000000111111;
-const small_move targetSquareMask = 0b0000111111000000;
-const small_move flagMask = 0b1111000000000000;
+const Move startSquareMask = 0b0000000000111111;
+const Move targetSquareMask = 0b0000111111000000;
+const Move flagMask = 0b1111000000000000;
 
-inline small_move create_move(integer startSquare, integer targetSquare, Flag flag = NoFlag) {
+inline Move create_move(integer startSquare, integer targetSquare, Flag flag = NoFlag) {
     return (startSquare | targetSquare << 6 | flag << 12);
 }
 
@@ -57,29 +47,7 @@ struct MadeMove {
     bool captured = false;
     Piece capturedPieceType = NONE;
     integer capturePosPlace = 0;
-};
-
-struct Move {
-    integer prevEnPassantSquare = 0;
-    Move_Type move_type = NO_MOVE;
-    integer oldPos = 0;
-    integer newPos = 0;
-    Piece ownPieceType = NONE;
-    bool team = TEAMWHITE;
-    integer specialPiece = 0; // Captured piece or the rook while castling etc.
-    Piece specialPieceType = NONE;
-    Piece promotionPiece = QUEEN;
-
-    bool operator==(const Move& other) const {
-        return oldPos == other.oldPos &&
-               ownPieceType == other.ownPieceType &&
-               newPos == other.newPos &&
-               move_type == other.move_type &&
-               specialPiece == other.specialPiece &&
-               specialPieceType == other.specialPieceType &&
-               team == other.team &&
-               promotionPiece == other.promotionPiece;
-    }
+    integer prevEnPassant = 0;
 };
 
 struct Board {
@@ -104,14 +72,13 @@ struct Board {
     bool inDoubleCheck = false;
     bool inCheck = false;
     bit_board opponentControlledSquares = 0ULL;
-    std::vector<small_move> movesVector = {};
-    std::map<integer, std::vector<small_move>> movesMap = {};
+    std::vector<Move> movesVector = {};
+    std::map<integer, std::vector<Move>> movesMap = {};
     uint8_t castleRights = 0;
     integer enPassantSquare = 0; // First bit says if enPassant is possible
     int halfMoves = 0;
     int fullMoves = 0;
     bool whiteToMove = TEAMWHITE;
-    bit_board opponentSquares = 0ULL;
 };
 
 inline Vector2 intToVector2(integer pos) {

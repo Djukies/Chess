@@ -80,7 +80,15 @@ inline void precompute() {
     computeKingMoves();
     computeKnightMoves();
     computeRays();
+}
 
+inline bit_board getRays(integer square1, integer square2) {
+   for (bit_board ray : rays[square1]) {
+       if (containsSquare(ray, square2)) {
+           return ray;
+       }
+   }
+   return 0ULL;
 }
 
 #endif //CHESS_PRECOMPUTEDDATA_H

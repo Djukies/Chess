@@ -27,7 +27,6 @@ private:
 public:
     Debug(Renderer* renderer, Board* board, GameLogic* gameLogic);
     void debugAll();
-    void moveGenTest(int depth);
     void newMoveGenTest(int depth);
     std::vector<bit_board> bitBoards = {};
 };

@@ -84,49 +84,15 @@ void addToBitboards(Board* board, integer pos, Piece pieceType, bool team) {
 #pragma clang diagnostic pop
 }
 
-
-void makeMove(Board* board, Move move) {
-    board->enPassantSquare = 0;
-    if (move.move_type == NORMAL_MOVE) {
-        replacePosToBitboards(board, move.oldPos, move.newPos);
-    }
-    else if (move.move_type == CAPTURE) {
-        removeFromBitboards(board, move.newPos);
-        replacePosToBitboards(board, move.oldPos, move.newPos);
-    }
-    else if (move.move_type == DOUBLE_PAWN_PUSH) {
-        replacePosToBitboards(board, move.oldPos, move.newPos);
-        board->enPassantSquare = move.newPos;
-        board->enPassantSquare |= 1ULL << 7;
-    }
-    else if (move.move_type == EN_PASSANT) {
-        removeFromBitboards(board, move.specialPiece);
-        replacePosToBitboards(board, move.oldPos, move.newPos);
-    }
-    else if (move.move_type == PROMOTION) {
-        removeFromBitboards(board, move.oldPos);
-        addToBitboards(board, move.newPos, move.promotionPiece, move.team);
-    }
-    else if (move.move_type == CAPTURE_PROMOTION) {
-        removeFromBitboards(board, move.oldPos);
-        removeFromBitboards(board, move.specialPiece);
-        addToBitboards(board, move.newPos, move.promotionPiece, move.team);
-    }
-    else if (move.move_type == CASTLE) {
-    }
-
-    board->whiteToMove = !board->whiteToMove;
-    board->fullMoves ++;
-}
-
 std::vector<MadeMove> movesMade = {};
 
-void makeSmallMove(Board* board, small_move move) {
-    board->enPassantSquare = 0;
-    integer startSquare = move & startSquareMask;
-    integer targetSquare = (move & targetSquareMask) >> 6;
-    int flag = ((move & flagMask) >> 12);
+void makeSmallMove(Board* board, Move Move) {
+    integer startSquare = Move & startSquareMask;
+    integer targetSquare = (Move & targetSquareMask) >> 6;
+    int flag = ((Move & flagMask) >> 12);
     MadeMove madeMove;
+    madeMove.prevEnPassant = board->enPassantSquare;
+    board->enPassantSquare = 0;
     switch (flag) {
         case NoFlag:
             if (containsSquare(board->blackPieces | board->whitePieces, targetSquare)) {
@@ -138,12 +104,18 @@ void makeSmallMove(Board* board, small_move move) {
             replacePosToBitboards(board, startSquare, targetSquare);
             break;
         case EnPassantCaptureFlag:
+            madeMove.captured = true;
+            madeMove.capturedPieceType = PAWN;
+            madeMove.capturePosPlace = targetSquare + (board->whiteToMove ? 8 : -8);
+            replacePosToBitboards(board, startSquare, targetSquare);
+            removeFromBitboards(board, targetSquare + (board->whiteToMove ? 8 : -8));
             break;
         case CastleFlag:
             break;
         case DoublePush:
             replacePosToBitboards(board, startSquare, targetSquare);
             board->enPassantSquare = targetSquare;
+
             break;
         default:
             break;
@@ -153,12 +125,12 @@ void makeSmallMove(Board* board, small_move move) {
     movesMade.push_back(madeMove);
 }
 
-void unMakeSmallMove(Board* board, small_move move) {
-    integer targetSquare = move & startSquareMask;
-    integer startSquare = (move & targetSquareMask) >> 6;
-    int flag = ((move & flagMask) >> 12);
+void unMakeSmallMove(Board* board, Move Move) {
+    integer targetSquare = Move & startSquareMask;
+    integer startSquare = (Move & targetSquareMask) >> 6;
+    int flag = ((Move & flagMask) >> 12);
     MadeMove moveToUnmake = movesMade[movesMade.size()-1];
-
+    board->enPassantSquare = moveToUnmake.prevEnPassant;
     switch (flag) {
         case NoFlag:
             replacePosToBitboards(board, startSquare, targetSquare);
@@ -168,12 +140,13 @@ void unMakeSmallMove(Board* board, small_move move) {
             }
             break;
         case EnPassantCaptureFlag:
+            replacePosToBitboards(board, startSquare, targetSquare);
+            addToBitboards(board, moveToUnmake.capturePosPlace, moveToUnmake.capturedPieceType, board->whiteToMove);
             break;
         case CastleFlag:
             break;
         case DoublePush:
             replacePosToBitboards(board, startSquare, targetSquare);
-            board->enPassantSquare = targetSquare;
             break;
         default:
             break;
@@ -181,40 +154,4 @@ void unMakeSmallMove(Board* board, small_move move) {
     board->whiteToMove = !board->whiteToMove;
     board->fullMoves--;
     movesMade.pop_back();
-}
-
-void unmakeMove(Board* board, Move move) {
-    board->enPassantSquare = move.prevEnPassantSquare;
-    if (move.prevEnPassantSquare != 0) {
-        board->enPassantSquare |= 1ULL << 7;
-    }
-    switch (move.move_type) {
-        case NORMAL_MOVE:
-            replacePosToBitboards(board, move.newPos, move.oldPos);
-            break;
-        case CAPTURE:
-            replacePosToBitboards(board, move.newPos, move.oldPos);
-            addToBitboards(board, move.specialPiece, move.specialPieceType, !move.team);
-            break;
-        case DOUBLE_PAWN_PUSH:
-            replacePosToBitboards(board, move.newPos, move.oldPos);
-            break;
-        case EN_PASSANT:
-            replacePosToBitboards(board, move.newPos, move.oldPos);
-            addToBitboards(board, move.specialPiece, move.specialPieceType, !move.team);
-            break;
-        case PROMOTION:
-            removeFromBitboards(board, move.specialPiece);
-            addToBitboards(board, move.oldPos, PAWN, move.team);
-            break;
-        case CAPTURE_PROMOTION:
-            removeFromBitboards(board, move.specialPiece);
-            addToBitboards(board, move.oldPos, PAWN, move.team);
-            addToBitboards(board, move.specialPiece, move.specialPieceType, !move.team);
-            break;
-        case CASTLE:
-            break;
-    }
-    board->whiteToMove = !board->whiteToMove;
-    board->fullMoves--;
 }
