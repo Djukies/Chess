@@ -34,7 +34,7 @@ int main() {
 
 
     // Test the moveGen (prints the amount of moves at every depth till depth:)
-    const int depth = 4;
+    const int depth = 6;
 
     std::cout << std::endl;
     debug->moveGenTest(depth);

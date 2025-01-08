@@ -27,23 +27,23 @@ void GameLogic::undoMoves() {
 
 
 bool GameLogic::tryMove(uint8_t oldPos, uint8_t newPos) {
-    Move smallMove = getSmallMove(oldPos, newPos, board->movesMap);
-    if (smallMove != 0) {
-        makeMove(board, smallMove);
+    Move move = getMove(oldPos, newPos, board->movesMap);
+    if (move != 0) {
+        makeMove(board, move);
 
         board->movesVector = calculateLegalMoves(board);
         board->movesMap = moveVectorToMap(board->movesVector);
         if (board->fullMoves-firstMadMove > madeMoves.size()) {
-            madeMoves.push_back(smallMove);
+            madeMoves.push_back(move);
             return true;
         }
 
-        if (smallMove != madeMoves[board->fullMoves - firstMadMove - 1]) {
+        if (move != madeMoves[board->fullMoves - firstMadMove - 1]) {
             uint size = madeMoves.size();
             for (int i = board->fullMoves - firstMadMove - 1; i < size; i++) {
                 madeMoves.pop_back();
             }
-            madeMoves.push_back(smallMove);
+            madeMoves.push_back(move);
         }
         return true;
     }

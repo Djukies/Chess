@@ -224,9 +224,9 @@ bit_board calculatePawnAttacks(bit_board pawns, bool isWhiteToMove) {
     // And then removing the A-File, because if they moved right, they can't be on the A-file
 
     if (isWhiteToMove) {
-        return ((pawns << 9) & notFileA) | ((pawns << 7) & notFileH);
+        return ((pawns >> 7) & notFileA) | ((pawns >> 9) & notFileH);
     }
-    return ((pawns >> 7) & notFileA) | ((pawns >> 9) & notFileH);
+    return ((pawns << 9) & notFileA) | ((pawns << 7) & notFileH);
 }
 
 void calculateAttackData(Board* board) {
