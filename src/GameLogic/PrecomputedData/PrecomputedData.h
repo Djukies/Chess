@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "../../Types.h"
-#include "../Bitboard Utility/BitboardUtility.h"
+#include "../BitboardUtility/BitboardUtility.h"
 
 inline integer distanceToEdge[64][8];
 inline int directions[8] = {-8, 8, -1, 1, -9, 9, -7, 7};

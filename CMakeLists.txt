@@ -21,9 +21,11 @@ add_executable(Chess src/main.cpp
         src/GameLogic/GameLogic.h
         src/GameLogic/MoveGeneration/MoveGeneration.cpp
         src/GameLogic/MoveGeneration/MoveGeneration.h
-        "src/GameLogic/Precomputed Data/PrecomputedData.cpp"
-        "src/GameLogic/Precomputed Data/PrecomputedData.h"
-        "src/GameLogic/Bitboard Utility/BitboardUtility.h")
+        src/GameLogic/PrecomputedData/PrecomputedData.cpp
+        src/GameLogic/PrecomputedData/PrecomputedData.h
+        src/GameLogic/BitboardUtility/BitboardUtility.h
+        src/Algorithm/Algorithm.cpp
+        src/Algorithm/Algorithm.h)
 
 add_compile_options("-g -O0")
 target_link_libraries(Chess raylib)

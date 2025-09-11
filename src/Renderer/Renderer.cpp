@@ -34,10 +34,11 @@ void Renderer::drawBoard() {
 
 void Renderer::drawMoves() {
     if (containsSquare(board->friendlyPieces, activePiece)) {
-
-
         for (Move move : board->movesMap[activePiece]) {
             int newPos = (move & targetSquareMask) >> 6;
+            if ((move & flagMask) >> 12 >= 5) {
+                continue; // Prevent all the other promotions except queen promotion from drawing to avoid duplicate drawings
+            }
             bool shouldHaveSmallCircle = containsSquare(board->emptySquares, newPos);
             if (vector2ScreenToInt(GetMousePosition(), squareSize) != newPos) {
                 DrawRing({intToVector2ScreenPos(newPos, squareSize).x + (float)squareSize / 2,

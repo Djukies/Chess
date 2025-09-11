@@ -7,8 +7,10 @@
 #include "Types.h"
 #include "Board/Board.h"
 #include "GameLogic/GameLogic.h"
-#include "GameLogic/Precomputed Data/PrecomputedData.h"
+#include "GameLogic/PrecomputedData/PrecomputedData.h"
 #include "GameLogic/MoveGeneration/MoveGeneration.h"
+#include "Algorithm/Algorithm.h"
+
 
 int main() {
 
@@ -22,8 +24,11 @@ int main() {
     // Set up the Board
     std::string FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";//rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
     Board* board = loadBoardFromFEN(FEN);
+    board->algorithm = false;
+    board->algorithmIsWhite = TEAMBLACK;
     // Set up the classes
-    auto* gameLogic = new GameLogic(board);
+    auto* algorithm = new Algorithm(board);
+    auto* gameLogic = new GameLogic(board, algorithm);
     auto* renderer = new Renderer(board, gameLogic);
     auto* debug = new Debug(renderer, board, gameLogic);
 
@@ -34,7 +39,7 @@ int main() {
 
 
     // Test the moveGen (prints the amount of moves at every depth till depth:)
-    const int depth = 6;
+    const int depth = 0;
 
     std::cout << std::endl;
     debug->moveGenTest(depth);

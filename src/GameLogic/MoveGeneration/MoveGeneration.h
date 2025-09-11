@@ -2,8 +2,8 @@
 #define CHESS_MOVEGENERATION_H
 
 #include "../../Types.h"
-#include "../Precomputed Data/PrecomputedData.h"
-#include "../Bitboard Utility/BitboardUtility.h"
+#include "../PrecomputedData/PrecomputedData.h"
+#include "../BitboardUtility/BitboardUtility.h"
 #include <vector>
 #include <map>
 

@@ -3,7 +3,7 @@
 #include "raylib.h"
 #include "../Types.h"
 #include "../GameLogic/GameLogic.h"
-#include "../GameLogic/Bitboard Utility/BitboardUtility.h"
+#include "../GameLogic/BitboardUtility/BitboardUtility.h"
 #include "cmath"
 
 

@@ -39,6 +39,16 @@ const Move startSquareMask = 0b0000000000111111;
 const Move targetSquareMask = 0b0000111111000000;
 const Move flagMask = 0b1111000000000000;
 
+const std::vector<int> pieceValues = {
+    1,
+    3,
+    3,
+    5,
+    9,
+    0,
+    0
+};
+
 inline Move create_move(integer startSquare, integer targetSquare, Flag flag = NoFlag) {
     return (startSquare | targetSquare << 6 | flag << 12);
 }
@@ -79,6 +89,8 @@ struct Board {
     int halfMoves = 0;
     int fullMoves = 0;
     bool whiteToMove = TEAMWHITE;
+    bool algorithm = false;
+    bool algorithmIsWhite = TEAMWHITE;
 };
 
 inline Vector2 intToVector2(integer pos) {

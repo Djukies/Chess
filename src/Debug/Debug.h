@@ -4,8 +4,8 @@
 #include <raylib.h>
 #include <chrono>
 #include <iomanip>
-#include "../GameLogic/Bitboard Utility/BitboardUtility.h"
-#include "../GameLogic/Precomputed Data/PrecomputedData.h"
+#include "../GameLogic/BitboardUtility/BitboardUtility.h"
+#include "../GameLogic/PrecomputedData/PrecomputedData.h"
 #include "../GameLogic/MoveGeneration/MoveGeneration.h"
 #include "../Types.h"
 #include "../Renderer/Renderer.h"

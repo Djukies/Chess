@@ -8,6 +8,8 @@
 #include <cmath>
 #include <chrono>
 
+#include "../Algorithm/Algorithm.h"
+
 
 inline Move getMove(integer oldPos, integer newPos, std::map<integer, std::vector<Move>> moves) {
     auto it = moves.find(oldPos); // Check if oldPos exists in the moves (Used to check if it is part of the right team for example)
@@ -26,14 +28,16 @@ inline Move getMove(integer oldPos, integer newPos, std::map<integer, std::vecto
 class GameLogic {
 private:
     Board* board;
+    Algorithm* algorithm;
 
     int firstMadMove = board->fullMoves;
 
 
 public:
-    explicit GameLogic(Board* board);
+    explicit GameLogic(Board* board, Algorithm* algorithm);
     void undoMoves();
     bool tryMove(integer oldPos, integer newPos);
+    void letAlgoMakeMove();
     std::map<integer, std::vector<Move>> moveVectorToMap(std::vector<Move> moves);
     std::vector<Move> madeMoves = {};
 };

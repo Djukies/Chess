@@ -5,6 +5,7 @@ bool isPinned(Board* board, integer piece) {
 }
 
 void generatePromotions(integer startSquare, integer targetSquare, std::vector<Move>& moves) {
+    std::cout << (int)startSquare << " " << (int)targetSquare << std::endl;
     moves.push_back(create_move(startSquare, targetSquare, PromoteToBishopFlag));
     moves.push_back(create_move(startSquare, targetSquare, PromoteToKnightFlag));
     moves.push_back(create_move(startSquare, targetSquare, PromoteToQueenFlag));
@@ -90,7 +91,7 @@ std::vector<Move> calculatePawnMoves(Board* board) {
     while (capturePromotionsA != 0) {
         int targetSquare = getIndex(capturePromotionsA);
         capturePromotionsA &= capturePromotionsA-1;
-        int startSquare = targetSquare - pushDir*8;
+        int startSquare = targetSquare - pushDir*7;
         if (!isPinned(board, startSquare) || getRays(board->friendlyKingPos, startSquare) == getRays(board->friendlyKingPos, targetSquare)) {
             generatePromotions(startSquare, targetSquare, moves);
         }
@@ -98,7 +99,7 @@ std::vector<Move> calculatePawnMoves(Board* board) {
     while (capturePromotionsB != 0) {
         int targetSquare = getIndex(capturePromotionsB);
         capturePromotionsB &= capturePromotionsB-1;
-        int startSquare = targetSquare - pushDir*8;
+        int startSquare = targetSquare - pushDir*9;
         if (!isPinned(board, startSquare) || getRays(board->friendlyKingPos, startSquare) == getRays(board->friendlyKingPos, targetSquare)) {
             generatePromotions(startSquare, targetSquare, moves);
         }
@@ -358,6 +359,13 @@ std::vector<Move> calculateLegalMoves(Board* board) {
         moves.insert(moves.end(), pawnMoves.begin(), pawnMoves.end());
         moves.insert(moves.end(), knightMoves.begin(), knightMoves.end());
         moves.insert(moves.end(), sliderMoves.begin(), sliderMoves.end());
+
+        for (Move move : pawnMoves) {
+            if ((move & flagMask) << 12 == PromoteToQueenFlag) {
+                std::cout << "PROMOTE" << std::endl;
+            }
+        }
     }
+
     return moves;
 }

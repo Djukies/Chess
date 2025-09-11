@@ -2,7 +2,7 @@
 #include "iostream"
 #include "../Types.h"
 #include "../Setup/Setup.h"
-#include "../GameLogic/Bitboard Utility/BitboardUtility.h"
+#include "../GameLogic/BitboardUtility/BitboardUtility.h"
 #include "raylib.h"
 #include <vector>
 
