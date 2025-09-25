@@ -24,11 +24,12 @@ int main() {
     // Set up the Board
     std::string FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";//rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
     Board* board = loadBoardFromFEN(FEN);
-    board->algorithm = false;
-    board->algorithmIsWhite = TEAMBLACK;
+    board->algorithmWhite = true;
+    board->algorithmBlack = true;
     // Set up the classes
-    auto* algorithm = new Algorithm(board);
-    auto* gameLogic = new GameLogic(board, algorithm);
+    auto* algorithmWhite = new Algorithm(board);
+    auto* algorithmBlack = new Algorithm(board);
+    auto* gameLogic = new GameLogic(board, algorithmWhite, algorithmBlack);
     auto* renderer = new Renderer(board, gameLogic);
     auto* debug = new Debug(renderer, board, gameLogic);
 

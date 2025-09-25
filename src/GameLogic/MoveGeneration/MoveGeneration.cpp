@@ -235,7 +235,7 @@ void calculateAttackData(Board* board) {
     int endIndex = 8;
     if ((board->queens & board->enemyPieces) == 0) {
         startIndex = (board->rooks & board->enemyPieces) == 0 ? 4 : 0;
-        endIndex = (board->bishops & board->enemyPieces) == 0 ? 8 : 4;
+        endIndex = (board->bishops & board->enemyPieces) == 0 ? 4 : 8;
     }
     for (int dir = startIndex; dir < endIndex; dir++) {
         bool isDiagonal = dir >= 4;
@@ -341,7 +341,6 @@ void init(Board* board) {
     board->opponentControlledSquares = 0ULL;
     board->emptySquares = ~(board->whitePieces | board->blackPieces);
     board->allPieces = board->blackPieces | board->whitePieces;
-
     calculateAttackData(board);
 }
 
@@ -366,6 +365,14 @@ std::vector<Move> calculateLegalMoves(Board* board) {
             }
         }
     }
-
+    if (moves.empty()) {
+        if (board->inCheck) {
+            board->checkMate = true;
+            if (board->whiteToMove) board->checkMateWhite = false;
+            else board->checkMateWhite = true;
+        } else {
+            board->staleMate = true;
+        }
+    }
     return moves;
 }

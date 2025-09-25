@@ -28,13 +28,14 @@ inline Move getMove(integer oldPos, integer newPos, std::map<integer, std::vecto
 class GameLogic {
 private:
     Board* board;
-    Algorithm* algorithm;
+    Algorithm* algorithmWhite;
+    Algorithm* algorithmBlack;
 
     int firstMadMove = board->fullMoves;
 
 
 public:
-    explicit GameLogic(Board* board, Algorithm* algorithm);
+    explicit GameLogic(Board* board, Algorithm* algorithmWhite, Algorithm* algorithmBlack);
     void undoMoves();
     bool tryMove(integer oldPos, integer newPos);
     void letAlgoMakeMove();

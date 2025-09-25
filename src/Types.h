@@ -58,6 +58,8 @@ struct MadeMove {
     Piece capturedPieceType = NONE;
     integer capturePosPlace = 0;
     integer prevEnPassant = 0;
+
+    bool operator==(const MadeMove & made_move) const = default;
 };
 
 struct Board {
@@ -88,9 +90,12 @@ struct Board {
     integer enPassantSquare = 0; // First bit says if enPassant is possible
     int halfMoves = 0;
     int fullMoves = 0;
+    bool checkMate = false;
+    bool checkMateWhite = false;
+    bool staleMate = false;
     bool whiteToMove = TEAMWHITE;
-    bool algorithm = false;
-    bool algorithmIsWhite = TEAMWHITE;
+    bool algorithmWhite = false;
+    bool algorithmBlack = false;
 };
 
 inline Vector2 intToVector2(integer pos) {

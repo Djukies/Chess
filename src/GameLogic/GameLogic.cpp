@@ -2,7 +2,8 @@
 #include "MoveGeneration/MoveGeneration.h"
 #include <iostream>
 
-GameLogic::GameLogic(Board *board, Algorithm* algorithm) : board(board), algorithm(algorithm) {}
+GameLogic::GameLogic(Board *board, Algorithm* algorithmWhite, Algorithm* algorithmBlack) : board(board), algorithmWhite(algorithmWhite), algorithmBlack(algorithmBlack) {
+}
 
 void GameLogic::undoMoves() {
     if (!IsKeyPressed(KEY_LEFT_SHIFT)) {
@@ -38,7 +39,9 @@ bool GameLogic::tryMove(uint8_t oldPos, uint8_t newPos) {
         board->movesMap = moveVectorToMap(board->movesVector);
         if (board->fullMoves-firstMadMove > madeMoves.size()) {
             madeMoves.push_back(move);
-            if (board->algorithm && board->whiteToMove == board->algorithmIsWhite) {
+            if (board->whiteToMove && board->algorithmWhite) {
+                this->letAlgoMakeMove();
+            } else if ((!board->whiteToMove) && board->algorithmBlack) {
                 this->letAlgoMakeMove();
             }
             return true;
@@ -51,7 +54,9 @@ bool GameLogic::tryMove(uint8_t oldPos, uint8_t newPos) {
             }
             madeMoves.push_back(move);
         }
-        if (board->algorithm && board->whiteToMove == board->algorithmIsWhite) {
+        if (board->whiteToMove && board->algorithmWhite) {
+            this->letAlgoMakeMove();
+        } else if ((!board->whiteToMove) && board->algorithmBlack) {
             this->letAlgoMakeMove();
         }
         return true;
@@ -60,15 +65,36 @@ bool GameLogic::tryMove(uint8_t oldPos, uint8_t newPos) {
 }
 
 void GameLogic::letAlgoMakeMove() {
-    std::cout << "OOOHHHH" << std::endl;
-    algorithm->calcBestMove();
-    makeMove(board, algorithm->bestMove);
+    //std::cout << "OOOHHHH" << std::endl;
+    if (board->whiteToMove) {
+        if (algorithmWhite->bestMove == 0) {
+            algorithmWhite->calcBestMove(4, TEAMWHITE);
+        }
+    } else {
+        if (algorithmBlack->bestMove == 0) {
+            algorithmBlack->calcBestMove(4, TEAMBLACK);
+        }
+    }
+    /*if (board->whiteToMove) {
+        algorithmWhite->calcBestMove(4, TEAMWHITE);
+    } else {
+        algorithmBlack->calcBestMove(4, TEAMBLACK);
+    }*/
+    makeMove(board, board->whiteToMove ? algorithmWhite->bestMove : algorithmBlack->bestMove);
     board->movesVector = calculateLegalMoves(board);
     board->movesMap = moveVectorToMap(board->movesVector);
-    Move move = algorithm->bestMove;
+    Move move = board->whiteToMove ? algorithmWhite->bestMove : algorithmBlack->bestMove;
     if (board->fullMoves-firstMadMove > madeMoves.size()) {
         madeMoves.push_back(move);
-        if (board->algorithm && board->whiteToMove == board->algorithmIsWhite) {
+        if (board->whiteToMove) {
+            algorithmWhite->calcBestMove(4, TEAMWHITE);
+        } else {
+            algorithmBlack->calcBestMove(4, TEAMBLACK);
+        }
+        return;
+        if (board->whiteToMove && board->algorithmWhite) {
+            this->letAlgoMakeMove();
+        } else if ((!board->whiteToMove) && board->algorithmBlack) {
             this->letAlgoMakeMove();
         }
         return;
@@ -81,7 +107,15 @@ void GameLogic::letAlgoMakeMove() {
         }
         madeMoves.push_back(move);
     }
-    if (board->algorithm && board->whiteToMove == board->algorithmIsWhite) {
+    if (board->whiteToMove) {
+        algorithmWhite->calcBestMove(4, TEAMWHITE);
+    } else {
+        algorithmBlack->calcBestMove(4, TEAMBLACK);
+    }
+    return;
+    if (board->whiteToMove && board->algorithmWhite) {
+        this->letAlgoMakeMove();
+    } else if ((!board->whiteToMove) && board->algorithmBlack) {
         this->letAlgoMakeMove();
     }
 }

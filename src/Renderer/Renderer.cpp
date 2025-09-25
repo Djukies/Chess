@@ -22,6 +22,14 @@ void Renderer::render() {
         onMouseDown();
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
         onMouseReleased();
+    if (IsKeyPressed(KEY_D)) {
+        if (board->whiteToMove && board->algorithmWhite) {
+            gameLogic->letAlgoMakeMove();
+        }
+        else if ((!board->whiteToMove) && board->algorithmBlack) {
+            gameLogic->letAlgoMakeMove();
+        }
+    }
 }
 
 void Renderer::drawBoard() {
@@ -70,6 +78,12 @@ void Renderer::drawPieces() {
 
         DrawTextureEx(texture, intToVector2ScreenPos(i, squareSize), 0, scale, WHITE);
         pieces &= pieces - 1; // Remove the least significant set bit
+    }
+    if (board->whiteToMove && board->algorithmWhite) {
+        gameLogic->letAlgoMakeMove();
+    }
+    else if ((!board->whiteToMove) && board->algorithmBlack) {
+        gameLogic->letAlgoMakeMove();
     }
 }
 

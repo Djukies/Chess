@@ -84,9 +84,20 @@ void addToBitboards(Board* board, integer pos, Piece pieceType, bool team) {
 #pragma clang diagnostic pop
 }
 
+void promoteHelp(Board* board, MadeMove* made_move, integer startSquare, integer targetSquare) {
+    if (containsSquare(board->blackPieces | board->whitePieces, targetSquare)) {
+        made_move->captured = true;
+        made_move->capturedPieceType = getPiece(board, targetSquare);
+        made_move->capturePosPlace = targetSquare;
+        removeFromBitboards(board, targetSquare);
+    }
+    removeFromBitboards(board, targetSquare);
+    removeFromBitboards(board, startSquare);
+}
+
 std::vector<MadeMove> movesMade = {};
 
-void makeMove(Board* board, Move move) {
+MadeMove makeMove(Board* board, Move move) {
     integer startSquare = move & startSquareMask;
     integer targetSquare = (move & targetSquareMask) >> 6;
     int flag = ((move & flagMask) >> 12);
@@ -115,7 +126,22 @@ void makeMove(Board* board, Move move) {
         case DoublePush:
             replacePosToBitboards(board, startSquare, targetSquare);
             board->enPassantSquare = targetSquare;
-
+            break;
+        case PromoteToBishopFlag:
+            promoteHelp(board, &madeMove, startSquare, targetSquare);
+            addToBitboards(board, targetSquare, BISHOP, board->whiteToMove);
+            break;
+        case PromoteToKnightFlag:
+            promoteHelp(board, &madeMove, startSquare, targetSquare);
+            addToBitboards(board, targetSquare, KNIGHT, board->whiteToMove);
+            break;
+        case PromoteToRookFlag:
+            promoteHelp(board, &madeMove, startSquare, targetSquare);
+            addToBitboards(board, targetSquare, ROOK, board->whiteToMove);
+            break;
+        case PromoteToQueenFlag:
+            promoteHelp(board, &madeMove, startSquare, targetSquare);
+            addToBitboards(board, targetSquare, QUEEN, board->whiteToMove);
             break;
         default:
             break;
@@ -123,6 +149,7 @@ void makeMove(Board* board, Move move) {
     board->whiteToMove = !board->whiteToMove;
     board->fullMoves++;
     movesMade.push_back(madeMove);
+    return madeMove;
 }
 
 void unMakeMove(Board* board, Move move) {
@@ -147,6 +174,17 @@ void unMakeMove(Board* board, Move move) {
             break;
         case DoublePush:
             replacePosToBitboards(board, startSquare, targetSquare);
+            break;
+        case PromoteToBishopFlag:
+        case PromoteToKnightFlag:
+        case PromoteToRookFlag:
+        case PromoteToQueenFlag:
+            removeFromBitboards(board, startSquare);
+            addToBitboards(board, targetSquare, PAWN, !board->whiteToMove);
+            if (moveToUnmake.captured) {
+                //CAPTURE
+                addToBitboards(board, moveToUnmake.capturePosPlace, moveToUnmake.capturedPieceType, board->whiteToMove);
+            }
             break;
         default:
             break;
