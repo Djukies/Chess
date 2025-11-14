@@ -19,6 +19,7 @@ int evaluatePosition(const Board* board, int depth) {
     if (board->staleMate) {
         return 0;
     }
+    // CAPTURE EVERYTHING THEN EVAL
     int eval = 0;
     eval += std::popcount(board->whitePieces & board->pawns) * pieceValues[PAWN];
     eval += std::popcount(board->whitePieces & board->knights) * pieceValues[KNIGHT];
@@ -35,12 +36,14 @@ int evaluatePosition(const Board* board, int depth) {
     return eval;
 }
 
+double movesSearched = 0;
 
 int miniMax(Board* board, int depth, int alpha, int beta, bool maximizingPlayer) {
     std::vector<Move> moves = calculateLegalMoves(board);
 
     // Base case: depth 0 OR no legal moves (checkmate/stalemate)
     if (depth == 0 || moves.empty()) {
+        movesSearched++;
         return evaluatePosition(board, depth);
     }
 
@@ -61,22 +64,19 @@ int miniMax(Board* board, int depth, int alpha, int beta, bool maximizingPlayer)
             maxEval = std::min(eval, maxEval); // Max eval should become as low as possible
             beta = std::min(beta, eval); // Beta should become as low as possible
         }
-        //if (beta <= alpha) {break;}
+        if (beta <= alpha) {break;}
     }
     return maxEval;
 }
 
 void Algorithm::runMinimax(bool engineIsWhite) {
     std::vector<Move> moves = calculateLegalMoves(board);
+
     int bestEval = engineIsWhite ? INT_MIN : INT_MAX;
-
-    int alpha = INT_MIN;
-    int beta = INT_MAX;
-
 
     for (const Move& move : moves) {
         makeMove(board, move);
-        int eval = miniMax(board, searchDepth - 1, alpha, beta, !engineIsWhite);
+        int eval = miniMax(board, searchDepth - 1, INT_MIN, INT_MAX, !engineIsWhite);
         unMakeMove(board, move);
         bestMovesMap.emplace_back(eval, move);
         if (engineIsWhite) {
@@ -84,21 +84,23 @@ void Algorithm::runMinimax(bool engineIsWhite) {
                 bestEval = eval;
                 bestMove = move;
             }
-            alpha = std::max(alpha, eval);
+            //alpha = std::max(alpha, eval);
         } else {
             if (eval < bestEval) {
                 bestEval = eval;
                 bestMove = move;
             }
-            beta = std::min(beta, eval);
+            //beta = std::min(beta, eval);
         }
-    }}
+    }
+}
 
 void Algorithm::calcBestMove(int depth, bool engineIsWhite) {
     if (board->checkMate || board->staleMate) {
         return;
     }
-    depth = 2;
+    depth = 4;
+    movesSearched = 0;
     bestMovesMap.clear();
     this->searchDepth = depth;
 
@@ -121,7 +123,7 @@ void Algorithm::calcBestMove(int depth, bool engineIsWhite) {
     for (auto [eval, move] : bestMovesMap) {
         std::cout << "Move: " << eval << ", " << intToChar(move & startSquareMask) << intToChar((move & targetSquareMask) >> 6) << std::endl;
     }
-    std::cout << "Best Move For " << (board->whiteToMove ? "White" : "Black") << ": " << bestEval << ", " << intToChar(this->bestMove & startSquareMask) << intToChar((this->bestMove & targetSquareMask) >> 6) << ", Time Taken: " << time.count() << " ms" << std::endl;
+    std::cout << "Best Move For " << (board->whiteToMove ? "White" : "Black") << ": " << bestEval << ", " << intToChar(this->bestMove & startSquareMask) << intToChar((this->bestMove & targetSquareMask) >> 6) << ", Time Taken: " << time.count() << " ms, Moves Seached: " << movesSearched << std::endl;
 
 }
 

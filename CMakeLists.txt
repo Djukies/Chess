@@ -29,7 +29,9 @@ add_executable(Chess src/main.cpp
         src/Board/Zobrist.cpp
         src/Board/Zobrist.h
         src/Algorithm/Stockfish/Stockfish.cpp
-        src/Algorithm/Stockfish/Stockfish.h)
+        src/Algorithm/Stockfish/Stockfish.h
+        src/Algorithm/UCI/UCI.cpp
+        src/Algorithm/UCI/UCI.h)
 
 add_compile_options("-g -O0")
 target_link_libraries(Chess raylib)

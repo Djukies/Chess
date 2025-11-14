@@ -11,7 +11,7 @@
 #include "GameLogic/MoveGeneration/MoveGeneration.h"
 #include "Algorithm/Algorithm.h"
 #include "Algorithm/Stockfish/Stockfish.h"
-
+#include "Algorithm/UCI/UCI.h"
 
 
 int main() {
@@ -37,6 +37,12 @@ int main() {
     debug->fen = FEN;
     gameLogic->algoWhiteStockfish = false;
     gameLogic->algoBlackStockfish = false;
+
+
+    UCIBridge engine;
+    engine.sendToEngine("uci");
+    engine.sendToEngine("isready");
+    engine.sendToEngine("setoption name coole shit om in te stellen value 4");
 
     // Set the moves at beginning (rest will automatic after Move)
     precompute();
