@@ -9,7 +9,7 @@
 #include "../GameLogic/MoveGeneration/MoveGeneration.h"
 #include "../Types.h"
 #include "../Renderer/Renderer.h"
-#include "../Algorithm/Stockfish/Stockfish.h"
+#include "../Bot/Algorithm/Stockfish/Stockfish.h"
 
 
 class Debug {
