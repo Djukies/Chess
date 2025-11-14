@@ -58,6 +58,7 @@ struct MadeMove {
     Piece capturedPieceType = NONE;
     integer capturePosPlace = 0;
     integer prevEnPassant = 0;
+    integer prevCastleRights = 0;
 
     bool operator==(const MadeMove & made_move) const = default;
 };
@@ -96,12 +97,58 @@ struct Board {
     bool whiteToMove = TEAMWHITE;
     bool algorithmWhite = false;
     bool algorithmBlack = false;
+    uint64_t zobristKey = 0;
+    std::vector<uint64_t> history = {}; // hashes since last irreversible move
+    std::string startingFen = "";
+    std::vector<Move> movesMade = {};
 };
 
 inline Vector2 intToVector2(integer pos) {
     integer x = pos%8;
     integer y = pos/8;
     return {(float)x, (float)y};
+}
+
+inline integer charToInt(std::string pos) {
+    // Basic validation: must be at least 2 characters (e.g., "a1")
+    if (pos.length() < 2) {
+        std::cerr << "Error: Invalid position string length: " << pos << std::endl;
+        return -1; // Indicate error
+    }
+
+    // 1. Calculate File Index (0-7, where 'a' is 0)
+    int file = pos[0] - 'a';
+
+    // 2. Calculate Rank Index (0-7, where '1' is 0)
+    // Note: The board is usually indexed from the bottom (rank 1) up.
+    int rank = '8' - pos[1];
+
+    // Additional basic validation for valid chess coordinates
+    if (file < 0 || file > 7 || rank < 0 || rank > 7) {
+        std::cerr << "Error: Position coordinates out of bounds: " << pos << std::endl;
+        return -1;
+    }
+
+    // 3. Calculate 0-63 index: (rank * 8) + file
+    return (rank * 8) + file;
+}
+
+inline std::string intToChar(integer pos) {
+    // Basic validation: must be at least 2 characters (e.g., "a1")
+    Vector2 posVector = intToVector2(pos);
+
+    // 1. Calculate File Index (0-7, where 'a' is 0)
+    int file = posVector.x;
+    int rank = posVector.y;
+
+    char fileChar = 'a' + file;
+    std::string fileStr;
+    fileStr = fileChar;
+    char rankChar = '8' - rank;
+    std::string rankStr;
+    rankStr = rankChar;
+
+    return fileStr + rankStr;
 }
 
 inline int intToX(int pos) {
@@ -127,5 +174,12 @@ inline Vector2 intToVector2ScreenPos(integer pos, int squareSize) {
     int y = (pos/8) * squareSize;
     return {(float)x, (float)y};
 }
+
+struct PerftResult {
+    std::map<std::string, int> move_nodes; // e.g., {"a2a3": 2186, "b2b3": 1964, ...}
+    long long total_nodes = 0;             // The final "Nodes searched" total
+    std::string full_breakdown;            // The raw move breakdown text
+
+};
 
 #endif //CHESS_TYPES_H

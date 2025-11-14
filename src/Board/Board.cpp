@@ -1,8 +1,11 @@
 #include "Board.h"
 
+#include "Zobrist.h"
+
 
 Board* loadBoardFromFEN(const std::string fen) {
     auto *board = new Board;
+    board->startingFen = fen;
     loadAllBoard(board, fen);
 
     return board;
@@ -98,12 +101,22 @@ void promoteHelp(Board* board, MadeMove* made_move, integer startSquare, integer
 std::vector<MadeMove> movesMade = {};
 
 MadeMove makeMove(Board* board, Move move) {
+    board->movesMade.push_back(move);
     integer startSquare = move & startSquareMask;
     integer targetSquare = (move & targetSquareMask) >> 6;
     int flag = ((move & flagMask) >> 12);
     MadeMove madeMove;
     madeMove.prevEnPassant = board->enPassantSquare;
     board->enPassantSquare = 0;
+    int piece = getPiece(board, startSquare) + (containsSquare(startSquare, board->whitePieces) ? 0 : 6);
+    board->zobristKey ^= Zobrist::pieceSquare[piece][startSquare];
+    madeMove.prevCastleRights = board->castleRights;
+    if (board->whiteToMove && (targetSquare == 56 || startSquare == 56)) {board->castleRights &= ~0b00000010ULL;}
+    if (board->whiteToMove && (targetSquare == 63 || startSquare == 63)) {board->castleRights &= ~0b00000001ULL;}
+    if (board->whiteToMove && (targetSquare == board->friendlyKingPos || startSquare == board->friendlyKingPos)) {board->castleRights &= ~0b00000011ULL;}
+    if (!board->whiteToMove && (targetSquare == 0 || startSquare == 0)) {board->castleRights &= ~0b00001000ULL;}
+    if (!board->whiteToMove && (targetSquare == 7 || startSquare == 7)) {board->castleRights &= ~0b00000100ULL;}
+    if (!board->whiteToMove && (targetSquare == board->friendlyKingPos || startSquare == board->friendlyKingPos)) {board->castleRights &= ~0b00001100ULL;}
     switch (flag) {
         case NoFlag:
             if (containsSquare(board->blackPieces | board->whitePieces, targetSquare)) {
@@ -122,6 +135,14 @@ MadeMove makeMove(Board* board, Move move) {
             removeFromBitboards(board, targetSquare + (board->whiteToMove ? 8 : -8));
             break;
         case CastleFlag:
+            replacePosToBitboards(board, startSquare, targetSquare);
+            if (startSquare > targetSquare) {
+                replacePosToBitboards(board, targetSquare-2, startSquare-1);
+            } else {
+                replacePosToBitboards(board, targetSquare+1, startSquare+1);
+            }
+            board->castleRights &= ~(board->whiteToMove ? 0b00000011ULL : 0b00001100ULL);
+
             break;
         case DoublePush:
             replacePosToBitboards(board, startSquare, targetSquare);
@@ -146,6 +167,7 @@ MadeMove makeMove(Board* board, Move move) {
         default:
             break;
     }
+
     board->whiteToMove = !board->whiteToMove;
     board->fullMoves++;
     movesMade.push_back(madeMove);
@@ -153,11 +175,13 @@ MadeMove makeMove(Board* board, Move move) {
 }
 
 void unMakeMove(Board* board, Move move) {
+    board->movesMade.pop_back();
     integer targetSquare = move & startSquareMask;
     integer startSquare = (move & targetSquareMask) >> 6;
     int flag = ((move & flagMask) >> 12);
     MadeMove moveToUnmake = movesMade[movesMade.size()-1];
     board->enPassantSquare = moveToUnmake.prevEnPassant;
+    board->castleRights = moveToUnmake.prevCastleRights;
     switch (flag) {
         case NoFlag:
             replacePosToBitboards(board, startSquare, targetSquare);
@@ -171,6 +195,13 @@ void unMakeMove(Board* board, Move move) {
             addToBitboards(board, moveToUnmake.capturePosPlace, moveToUnmake.capturedPieceType, board->whiteToMove);
             break;
         case CastleFlag:
+            replacePosToBitboards(board, startSquare, targetSquare);
+            if (startSquare < targetSquare) {
+                replacePosToBitboards(board, targetSquare-1, startSquare-2);
+            } else {
+                replacePosToBitboards(board, targetSquare+1, startSquare+1);
+            }
+
             break;
         case DoublePush:
             replacePosToBitboards(board, startSquare, targetSquare);

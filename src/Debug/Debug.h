@@ -9,6 +9,7 @@
 #include "../GameLogic/MoveGeneration/MoveGeneration.h"
 #include "../Types.h"
 #include "../Renderer/Renderer.h"
+#include "../Algorithm/Stockfish/Stockfish.h"
 
 
 class Debug {
@@ -24,8 +25,10 @@ private:
 
     int currentSquare = 0;
     int currentDir = 0;
+
 public:
     Debug(Renderer* renderer, Board* board, GameLogic* gameLogic);
+    std::string fen;
     void debugAll();
     void moveGenTest(int depth);
     std::vector<bit_board> bitBoards = {};

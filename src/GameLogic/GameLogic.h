@@ -3,12 +3,14 @@
 
 #include "../Types.h"
 #include "../Board/Board.h"
+#include "../Board/Zobrist.h"
 #include <map>
 #include <vector>
 #include <cmath>
 #include <chrono>
 
 #include "../Algorithm/Algorithm.h"
+#include "../Algorithm/Stockfish/Stockfish.h"
 
 
 inline Move getMove(integer oldPos, integer newPos, std::map<integer, std::vector<Move>> moves) {
@@ -36,9 +38,14 @@ private:
 
 public:
     explicit GameLogic(Board* board, Algorithm* algorithmWhite, Algorithm* algorithmBlack);
+    uint64_t computeHash() const;
+    bool isThreeFoldRepetition() const;
     void undoMoves();
     bool tryMove(integer oldPos, integer newPos);
+    bool algoWhiteStockfish = false;
+    bool algoBlackStockfish = false;
     void letAlgoMakeMove();
+    void letAlgoStockfishMakeMove();
     std::map<integer, std::vector<Move>> moveVectorToMap(std::vector<Move> moves);
     std::vector<Move> madeMoves = {};
 };

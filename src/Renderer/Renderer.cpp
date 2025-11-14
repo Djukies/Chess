@@ -23,6 +23,9 @@ void Renderer::render() {
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
         onMouseReleased();
     if (IsKeyPressed(KEY_D)) {
+        if (board->checkMate || board->staleMate) {
+            return;
+        }
         if (board->whiteToMove && board->algorithmWhite) {
             gameLogic->letAlgoMakeMove();
         }
@@ -41,11 +44,29 @@ void Renderer::drawBoard() {
 }
 
 void Renderer::drawMoves() {
+
     if (containsSquare(board->friendlyPieces, activePiece)) {
         for (Move move : board->movesMap[activePiece]) {
             int newPos = (move & targetSquareMask) >> 6;
             if ((move & flagMask) >> 12 >= 5) {
                 continue; // Prevent all the other promotions except queen promotion from drawing to avoid duplicate drawings
+            }
+            if ((move & flagMask) >> 12 == CastleFlag) {
+                bool castleKingSide = newPos % 8 == 6;
+                int drawCircleAt = castleKingSide ? board->friendlyKingPos + 2 : board->friendlyKingPos - 2;
+                bool shouldHaveSmallCircle = containsSquare(board->emptySquares, drawCircleAt);
+                if (vector2ScreenToInt(GetMousePosition(), squareSize) != drawCircleAt) {
+                    DrawRing({intToVector2ScreenPos(drawCircleAt, squareSize).x + (float)squareSize / 2,
+                              intToVector2ScreenPos(drawCircleAt, squareSize).y + (float)squareSize / 2},
+                             shouldHaveSmallCircle ? 0 : 0.4f * (float)squareSize, shouldHaveSmallCircle ? 0.2f * (float)squareSize : 0.5f * (float)squareSize,
+                             0, 360, 0, MOVECOLOR);
+                }
+                else {
+                    DrawCircle((int)intToVector2ScreenPos(drawCircleAt, squareSize).x + squareSize / 2,
+                               (int)intToVector2ScreenPos(drawCircleAt, squareSize).y + squareSize / 2,
+                               shouldHaveSmallCircle ? 0.25f * (float)squareSize : 0.5f * (float)squareSize, MOVECOLOR);
+                }
+                continue;
             }
             bool shouldHaveSmallCircle = containsSquare(board->emptySquares, newPos);
             if (vector2ScreenToInt(GetMousePosition(), squareSize) != newPos) {
@@ -78,12 +99,6 @@ void Renderer::drawPieces() {
 
         DrawTextureEx(texture, intToVector2ScreenPos(i, squareSize), 0, scale, WHITE);
         pieces &= pieces - 1; // Remove the least significant set bit
-    }
-    if (board->whiteToMove && board->algorithmWhite) {
-        gameLogic->letAlgoMakeMove();
-    }
-    else if ((!board->whiteToMove) && board->algorithmBlack) {
-        gameLogic->letAlgoMakeMove();
     }
 }
 
@@ -161,8 +176,9 @@ void Renderer::onMouseDown() {
 
 void Renderer::onMouseReleased() {
     // Try to make the Move
+    int newPos = vector2ScreenToInt(GetMousePosition(), squareSize);
     if (pieceActive) {
-        gameLogic->tryMove(activePiece, vector2ScreenToInt(GetMousePosition(), squareSize));
+        gameLogic->tryMove(activePiece, newPos);
     }
     holdingPiece = false;
 }

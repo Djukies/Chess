@@ -5,7 +5,6 @@ bool isPinned(Board* board, integer piece) {
 }
 
 void generatePromotions(integer startSquare, integer targetSquare, std::vector<Move>& moves) {
-    std::cout << (int)startSquare << " " << (int)targetSquare << std::endl;
     moves.push_back(create_move(startSquare, targetSquare, PromoteToBishopFlag));
     moves.push_back(create_move(startSquare, targetSquare, PromoteToKnightFlag));
     moves.push_back(create_move(startSquare, targetSquare, PromoteToQueenFlag));
@@ -137,6 +136,34 @@ std::vector<Move> calculateKingMoves(Board* board) {
         integer targetSquare = getIndex(possibleMoves);
         possibleMoves &= possibleMoves-1;
         moves.push_back(create_move(board->friendlyKingPos, targetSquare));
+    }
+    if (board->castleRights != 0) {
+
+        if (board->whiteToMove && (board->castleRights & 0b00000011ULL) != 0) {
+            if (board->castleRights & 0b00000001ULL) {
+                // check for pieces and checks in the way
+
+                if ((0b01100000ULL << (8*7) & board->allPieces) == 0 && (0b01110000ULL << (8*7) & board->opponentControlledSquares) == 0) {
+                    moves.push_back(create_move(board->friendlyKingPos, board->friendlyKingPos + 2, CastleFlag));
+                }
+            }
+            if (board->castleRights & 0b00000010ULL) {
+                if (((0b00001110ULL << (8*7)) & board->allPieces) == 0 && ((0b00011100ULL << (8*7)) & board->opponentControlledSquares) == 0) {
+                    moves.push_back(create_move(board->friendlyKingPos, board->friendlyKingPos - 2, CastleFlag));
+                }
+            }
+        } else if (!board->whiteToMove && (board->castleRights & 0b00001100ULL) != 0) {
+            if (board->castleRights & 0b00000100ULL) {
+                if ((0b01100000ULL & board->allPieces) == 0 && (0b01110000ULL & board->opponentControlledSquares) == 0) {
+                    moves.push_back(create_move(board->friendlyKingPos, board->friendlyKingPos + 2, CastleFlag));
+                }
+            }
+            if (board->castleRights & 0b00001000ULL) {
+                if (((0b00001110ULL) & board->allPieces) == 0 && ((0b00011100ULL) & board->opponentControlledSquares) == 0) {
+                    moves.push_back(create_move(board->friendlyKingPos, board->friendlyKingPos - 2, CastleFlag));
+                }
+            }
+        }
     }
 
     return moves;
@@ -366,6 +393,7 @@ std::vector<Move> calculateLegalMoves(Board* board) {
         }
     }
     if (moves.empty()) {
+        //std::cout << "checkmate" << std::endl;
         if (board->inCheck) {
             board->checkMate = true;
             if (board->whiteToMove) board->checkMateWhite = false;
@@ -373,6 +401,9 @@ std::vector<Move> calculateLegalMoves(Board* board) {
         } else {
             board->staleMate = true;
         }
+    } else {
+        board->checkMate = false;
+        board->staleMate = false;
     }
     return moves;
 }

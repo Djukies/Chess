@@ -16,4 +16,6 @@ Board* loadBoardFromFEN(const std::string fen);
 MadeMove makeMove(Board* board, Move move);
 void unMakeMove(Board* board, Move move);
 
+
+
 #endif //CHESS_BOARD_H

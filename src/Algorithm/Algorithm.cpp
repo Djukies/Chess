@@ -1,5 +1,7 @@
 #include "Algorithm.h"
 
+#include <algorithm>
+#include <chrono>
 #include <climits>
 
 #include "../GameLogic/MoveGeneration/MoveGeneration.h"
@@ -9,70 +11,14 @@ Algorithm::Algorithm(Board *board) : board(board) {
 
 }
 
-int Algorithm::miniMax(int depth, bool maximizingPlayer) {
-    if (depth == 0) {
-        return evaluatePosition();
+int evaluatePosition(const Board* board, int depth) {
+    if (board->checkMate) {
+        if (board->checkMateWhite) return 1000 + depth;
+        else return -1000 - depth;
     }
-
-    std::vector<Move> moves = calculateLegalMoves(board);
-    if (moves.empty()) {
-        // No legal moves: return evaluation (e.g. mate/stalemate handled inside evaluate)
-        return evaluatePosition();
+    if (board->staleMate) {
+        return 0;
     }
-
-    if (maximizingPlayer) {
-        int maxEval = INT_MIN;
-        for (const Move& move : moves) {
-            makeMove(board, move);
-            int eval = miniMax(depth - 1, false);
-            unMakeMove(board, move);
-            if (eval > maxEval) maxEval = eval;
-        }
-        return maxEval;
-    } else {
-        int minEval = INT_MAX;
-        for (const Move& move : moves) {
-            makeMove(board, move);
-            int eval = miniMax(depth - 1, true);
-            unMakeMove(board, move);
-            if (eval < minEval) minEval = eval;
-        }
-        return minEval;
-    }
-}
-
-void Algorithm::calcBestMove(int depth, bool engineIsWhite) {
-    this->bestMove = this->board->movesVector[0];
-    this->searchDepth = depth;
-    //int bestMoveEval = miniMax(depth, INT_MIN, INT_MAX, true);
-
-    std::vector<Move> moves = calculateLegalMoves(board);
-    int bestEval = engineIsWhite ? INT_MIN : INT_MAX;
-
-    for (const Move& move : moves) {
-        makeMove(board, move);
-        int eval = miniMax(searchDepth - 1, !engineIsWhite);
-        unMakeMove(board, move);
-
-        if (engineIsWhite) {
-            if (eval > bestEval) {
-                bestEval = eval;
-                bestMove = move;
-            }
-        } else {
-            if (eval < bestEval) {
-                bestEval = eval;
-                bestMove = move;
-            }
-        }
-    }
-
-    //std::cout << "Best Move: " << bestEval << ", " << intToX(this->bestMove & startSquareMask) << "," << intToY(this->bestMove & startSquareMask) << ", " << intToX((this->bestMove & targetSquareMask) >> 6) << "," << intToY((this->bestMove & targetSquareMask) >> 6) << std::endl;
-
-}
-
-int Algorithm::evaluatePosition() {
-    if (board->checkMate)
     int eval = 0;
     eval += std::popcount(board->whitePieces & board->pawns) * pieceValues[PAWN];
     eval += std::popcount(board->whitePieces & board->knights) * pieceValues[KNIGHT];
@@ -88,3 +34,95 @@ int Algorithm::evaluatePosition() {
 
     return eval;
 }
+
+
+int miniMax(Board* board, int depth, int alpha, int beta, bool maximizingPlayer) {
+    std::vector<Move> moves = calculateLegalMoves(board);
+
+    // Base case: depth 0 OR no legal moves (checkmate/stalemate)
+    if (depth == 0 || moves.empty()) {
+        return evaluatePosition(board, depth);
+    }
+
+    int maxEval = maximizingPlayer ? INT_MIN : INT_MAX; // Assign the worst possible move: for white it's negative infinity for black positive infinity
+    for (const Move& move : moves) { // Loop over all moves currently at
+        makeMove(board, move); // Play move
+        // Go recursive till depth = 0, alpha, beta stay the same, at deeper depth it will try to maximize the other player (black => white, white => black)
+        int eval = miniMax(board, depth - 1, alpha, beta, !maximizingPlayer);
+
+        unMakeMove(board, move); // Unplay the move
+
+        // If maximizing white....
+        if (maximizingPlayer) {
+            maxEval = std::max(eval, maxEval); // Max eval should become as high as possible
+            alpha = std::max(alpha, eval); // Alpha should become as high as possible
+        }
+        else { // Else if maximizing black ...
+            maxEval = std::min(eval, maxEval); // Max eval should become as low as possible
+            beta = std::min(beta, eval); // Beta should become as low as possible
+        }
+        //if (beta <= alpha) {break;}
+    }
+    return maxEval;
+}
+
+void Algorithm::runMinimax(bool engineIsWhite) {
+    std::vector<Move> moves = calculateLegalMoves(board);
+    int bestEval = engineIsWhite ? INT_MIN : INT_MAX;
+
+    int alpha = INT_MIN;
+    int beta = INT_MAX;
+
+
+    for (const Move& move : moves) {
+        makeMove(board, move);
+        int eval = miniMax(board, searchDepth - 1, alpha, beta, !engineIsWhite);
+        unMakeMove(board, move);
+        bestMovesMap.emplace_back(eval, move);
+        if (engineIsWhite) {
+            if (eval > bestEval) {
+                bestEval = eval;
+                bestMove = move;
+            }
+            alpha = std::max(alpha, eval);
+        } else {
+            if (eval < bestEval) {
+                bestEval = eval;
+                bestMove = move;
+            }
+            beta = std::min(beta, eval);
+        }
+    }}
+
+void Algorithm::calcBestMove(int depth, bool engineIsWhite) {
+    if (board->checkMate || board->staleMate) {
+        return;
+    }
+    depth = 2;
+    bestMovesMap.clear();
+    this->searchDepth = depth;
+
+    const auto start = std::chrono::high_resolution_clock::now();
+
+    runMinimax(engineIsWhite);
+
+    const auto end = std::chrono::high_resolution_clock::now();
+    const auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    std::ranges::sort(bestMovesMap,
+                      [engineIsWhite](const auto& a, const auto& b) {
+                          return engineIsWhite ? a.first > b.first : a.first < b.first; // highest eval first
+                      });
+
+    int bestEval = bestMovesMap.front().first;
+    this->bestMove = bestMovesMap.front().second;
+
+
+    for (auto [eval, move] : bestMovesMap) {
+        std::cout << "Move: " << eval << ", " << intToChar(move & startSquareMask) << intToChar((move & targetSquareMask) >> 6) << std::endl;
+    }
+    std::cout << "Best Move For " << (board->whiteToMove ? "White" : "Black") << ": " << bestEval << ", " << intToChar(this->bestMove & startSquareMask) << intToChar((this->bestMove & targetSquareMask) >> 6) << ", Time Taken: " << time.count() << " ms" << std::endl;
+
+}
+
+

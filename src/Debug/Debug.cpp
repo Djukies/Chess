@@ -21,6 +21,10 @@ void Debug::debugAll() {
 
 void Debug::showBitBoards() {
     this->bitBoards = {0ULL,
+        0b01100000ULL << (8*7),
+        0b01110000ULL << (8*7),
+        (0b00001110ULL << (8*7)),
+        (0b00011100ULL << (8*7)),
                        board->pinnedPieces,
                        rays[board->friendlyKingPos][3],
                        board->opponentControlledSquares,
@@ -100,10 +104,12 @@ char intToChar(int x) {
     }
 }
 
-double moveCount = 0;
+long long moveCount = 0;
+int moveCountPerRootMove = 0;
 int captures = 0;
 int enPassants = 0;
-void MoveGenerationTest(Board* board, const int depth)
+int maxDepth = 0;
+void MoveGenerationTestRecursive(Board* board, const int depth)
 {
 
     if (depth == 0)
@@ -114,6 +120,7 @@ void MoveGenerationTest(Board* board, const int depth)
 
     if (depth == 1) {
         moveCount += (double) moves.size();
+        moveCountPerRootMove += (double) moves.size();
         for (Move move : moves) {
             if (containsSquare(board->whitePieces | board->blackPieces, (move & targetSquareMask) >> 6)) {captures++;}
             if (((move & flagMask) >> 12) == EnPassantCaptureFlag) {
@@ -126,6 +133,7 @@ void MoveGenerationTest(Board* board, const int depth)
     }
     for (const Move move : moves)
     {
+
         //moveList.push_back(Move);
         /*Board boardDupe = createBoardDupe(board);
         if (!isSame(boardDupe, board)) {
@@ -134,8 +142,14 @@ void MoveGenerationTest(Board* board, const int depth)
             std::cout << std::endl;
         }*/
         makeMove(board, move);
-        MoveGenerationTest(board, depth - 1);
+        MoveGenerationTestRecursive(board, depth - 1);
         unMakeMove(board, move);
+        /*if (depth == maxDepth) {
+            int oldPos = move & startSquareMask;
+            int newPos = (move & targetSquareMask) >> 6;
+            std::cout << intToChar(intToX(oldPos)) << 8-intToY(oldPos) << intToChar(intToX(newPos)) << 8-intToY(newPos) << ": " << moveCountPerRootMove << std::endl;
+            moveCountPerRootMove = 0;
+        }*/
         /*if (!isSame(boardDupe, board)) {
             if (true) {
                 std::cout << "Is different after MAKE/UNMAKE";
@@ -152,14 +166,115 @@ void MoveGenerationTest(Board* board, const int depth)
     }
 }
 
+PerftResult perftResult = {};
+
+void MoveGenerationTest(Board* board, const int depth) {
+    moveCount = 0;
+    captures = 0;
+    enPassants = 0;
+    std::vector<Move> moves = calculateLegalMoves(board);
+    for (const Move move : moves) {
+        moveCountPerRootMove = 0;
+        makeMove(board, move);
+        MoveGenerationTestRecursive(board, depth - 1);
+        unMakeMove(board, move);
+        int oldPos = move & startSquareMask;
+        int newPos = (move & targetSquareMask) >> 6;
+        std::string key =
+            std::string(1, intToChar(intToX(oldPos))) +
+            std::to_string(8 - intToY(oldPos)) +
+            std::string(1, intToChar(intToX(newPos))) +
+            std::to_string(8 - intToY(newPos));
+        if (moveCountPerRootMove == 0) moveCountPerRootMove++;
+        perftResult.move_nodes[key] = moveCountPerRootMove;
+    }
+    perftResult.total_nodes = moveCount;
+    /*std::cout << "\nMove Breakdown (Map Contents):\n";
+        for (const auto& pair : perftResult.move_nodes) {
+            std::cout << "  Move: " << pair.first << ", Nodes: " << pair.second << "\n";
+        }*/
+}
+
+bool compare_perft_results(const std::map<std::string, int>& map_a, const std::map<std::string, int>& map_b) {
+    bool identical = true;
+
+    // 1. Check if the total number of moves (map size) is the same.
+    if (map_a.size() != map_b.size()) {
+        std::cout << "❌ **TOTAL SIZE MISMATCH!**\n";
+        std::cout << "   Your Generator found " << map_a.size() << " moves.\n";
+        std::cout << "   Stockfish found " << map_b.size() << " moves.\n";
+        identical = false;
+    }
+
+    //std::cout << "\n--- Detailed Perft Comparison ---\n";
+
+    // 2. Iterate through Map A (Your Generator) and check against Map B (Stockfish).
+    for (const auto& pair_a : map_a) {
+        const std::string& move = pair_a.first;
+        int nodes_a = pair_a.second;
+
+        auto it_b = map_b.find(move);
+
+        if (it_b == map_b.end()) {
+            // Case A: Key exists in A but not in B. (You generated a move Stockfish didn't)
+            std::cout << "❌ **MISSING MOVE:** Your generator found move **" << move
+                      << "** (Nodes: " << nodes_a << "), but Stockfish did not.\n";
+            identical = false;
+        } else {
+            // Case B: Key exists in both. Check if the values match.
+            int nodes_b = it_b->second;
+            if (nodes_a != nodes_b) {
+                std::cout << "⚠️ **NODE COUNT MISMATCH for move " << move << ".\n";
+                std::cout << "   - Your Count: " << nodes_a << "\n";
+                std::cout << "   - SF Count:   " << nodes_b << "\n";
+                std::cout << "   - Difference: " << nodes_a - nodes_b << " nodes.\n";
+                identical = false;
+            }
+        }
+    }
+
+    // 3. Check for keys that exist in B but not in A (Stockfish found a move you didn't).
+    for (const auto& pair_b : map_b) {
+        const std::string& move = pair_b.first;
+
+        if (map_a.find(move) == map_a.end()) {
+            std::cout << "❌ **EXTRA MOVE:** Stockfish found move **" << move
+                      << "** (Nodes: " << pair_b.second << "), but your generator did not.\n";
+            identical = false;
+        }
+    }
+
+    //std::cout << "\n-----------------------------------\n";
+    if (identical) {
+        //std::cout << "🎉 **PERFT SUCCESS!** All moves and node counts match.\n";
+        // std::cout << "\n-----------------------------------\n";
+    } else {
+        std::cout << "💔 **PERFT FAILURE!** Differences detected.\n";
+        std::cout << "\n-----------------------------------\n";
+    }
+
+    return identical;
+}
+
 void Debug::moveGenTest(int depth) {
-    for (int checkDepth = 0; checkDepth <= depth; checkDepth++) {
-        moveCount = 0;
-        captures = 0;
-        enPassants = 0;
+    maxDepth = depth;
+    for (int checkDepth = 1; checkDepth <= depth; checkDepth++) {
         const auto start = std::chrono::high_resolution_clock::now();
         MoveGenerationTest(board, checkDepth);
         const auto end = std::chrono::high_resolution_clock::now();
         const auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-        std::cout << "Depth: " << checkDepth << ", Moves: " << std::fixed << std::setprecision(0) << moveCount << ", Time taken: " << time.count() << "ms" << " (Captures: " << captures << ", En Passants: " << enPassants << ")" << std::endl;    }
+        PerftResult stockfishResult = Stockfish(fen, checkDepth);
+
+        /*std::cout << "\nStockfish Result:\n";
+        std::cout << "\nMove Breakdown (Map Contents):\n";
+        for (const auto& pair : stockfishResult.move_nodes) {
+            std::cout << "  Move: " << pair.first << ", Nodes: " << pair.second << std::endl;;
+        }*/
+
+        compare_perft_results(perftResult.move_nodes, stockfishResult.move_nodes);
+        std::cout << "Depth: " << checkDepth << ", Moves: " << std::fixed << std::setprecision(0) << moveCount << ", Time taken: " << time.count() << "ms" << " (Captures: " << captures << ", En Passants: " << enPassants << "), (Stockfish amount: " << stockfishResult.total_nodes << ", Correct: " << ((stockfishResult.total_nodes == moveCount) ? "True" : "False") << ")" << std::endl;
+    }
+
+    std::cout << StockfishGetMove({}, fen) << std::endl;
+
 }

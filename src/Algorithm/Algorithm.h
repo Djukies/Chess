@@ -5,18 +5,25 @@
 #include "../Board/Board.h"
 #include "../Algorithm/Algorithm.h"
 
+#include <random>
 
+int evaluatePosition(const Board* board, int depth);
 
 class Algorithm {
-    private:
+
+private:
+
+
     Board* board;
-    int miniMax(int depth, bool maximizingPlayer);
+    //int miniMax(int depth, int alpha, int beta, bool maximizingPlayer);
     int searchDepth;
-    public:
+    void runMinimax(bool engineIsWhite);
+public:
     explicit Algorithm(Board* board);
     Move bestMove{};
     void calcBestMove(int depth, bool engineIsWhite);
-    int evaluatePosition();
+    //int evaluatePosition(int depth);
+    std::vector<std::pair<int, Move>> bestMovesMap = {};
 };
 
 

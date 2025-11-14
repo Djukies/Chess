@@ -10,6 +10,8 @@
 #include "GameLogic/PrecomputedData/PrecomputedData.h"
 #include "GameLogic/MoveGeneration/MoveGeneration.h"
 #include "Algorithm/Algorithm.h"
+#include "Algorithm/Stockfish/Stockfish.h"
+
 
 
 int main() {
@@ -32,6 +34,9 @@ int main() {
     auto* gameLogic = new GameLogic(board, algorithmWhite, algorithmBlack);
     auto* renderer = new Renderer(board, gameLogic);
     auto* debug = new Debug(renderer, board, gameLogic);
+    debug->fen = FEN;
+    gameLogic->algoWhiteStockfish = false;
+    gameLogic->algoBlackStockfish = false;
 
     // Set the moves at beginning (rest will automatic after Move)
     precompute();
@@ -44,16 +49,18 @@ int main() {
 
     std::cout << std::endl;
     debug->moveGenTest(depth);
-    calculateLegalMoves(board);
+
     // Loop while the window shouldn't close
     while (!WindowShouldClose())
     {
-        // All the game logic
+        // Be able to undo Moves (only if key pressed)
         gameLogic->undoMoves();
 
         // All the rendering
         BeginDrawing();
+            // In renderer checks for clicks etc
             renderer->render();
+            // Debugs like showing bitboards
             debug->debugAll();
         EndDrawing();
 
