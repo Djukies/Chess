@@ -9,8 +9,8 @@
 #include <cmath>
 #include <chrono>
 
-#include "../Algorithm/Algorithm.h"
-#include "../Algorithm/Stockfish/Stockfish.h"
+#include "../Bot/Algorithm/Algorithm.h"
+#include "../Bot/Algorithm/Stockfish/Stockfish.h"
 
 
 inline Move getMove(integer oldPos, integer newPos, std::map<integer, std::vector<Move>> moves) {

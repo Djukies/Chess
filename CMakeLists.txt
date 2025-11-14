@@ -24,14 +24,15 @@ add_executable(Chess src/main.cpp
         src/GameLogic/PrecomputedData/PrecomputedData.cpp
         src/GameLogic/PrecomputedData/PrecomputedData.h
         src/GameLogic/BitboardUtility/BitboardUtility.h
-        src/Algorithm/Algorithm.cpp
-        src/Algorithm/Algorithm.h
+        src/Bot/Algorithm/Algorithm.cpp
+        src/Bot/Algorithm/Algorithm.h
         src/Board/Zobrist.cpp
         src/Board/Zobrist.h
-        src/Algorithm/Stockfish/Stockfish.cpp
-        src/Algorithm/Stockfish/Stockfish.h
-        src/Algorithm/UCI/UCI.cpp
-        src/Algorithm/UCI/UCI.h)
+        src/Bot/Algorithm/Stockfish/Stockfish.cpp
+        src/Bot/Algorithm/Stockfish/Stockfish.h
+        src/Bot/UCI/UCI.cpp
+        src/Bot/UCI/UCI.h
+        src/Bot/Bot.cpp)
 
 add_compile_options("-g -O0")
 target_link_libraries(Chess raylib)

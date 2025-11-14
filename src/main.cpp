@@ -9,9 +9,9 @@
 #include "GameLogic/GameLogic.h"
 #include "GameLogic/PrecomputedData/PrecomputedData.h"
 #include "GameLogic/MoveGeneration/MoveGeneration.h"
-#include "Algorithm/Algorithm.h"
-#include "Algorithm/Stockfish/Stockfish.h"
-#include "Algorithm/UCI/UCI.h"
+#include "Bot/Algorithm/Algorithm.h"
+#include "Bot/Algorithm/Stockfish/Stockfish.h"
+#include "Bot/UCI/UCI.h"
 
 
 int main() {
@@ -34,15 +34,16 @@ int main() {
     auto* gameLogic = new GameLogic(board, algorithmWhite, algorithmBlack);
     auto* renderer = new Renderer(board, gameLogic);
     auto* debug = new Debug(renderer, board, gameLogic);
+    auto* uci = new UCI();
     debug->fen = FEN;
     gameLogic->algoWhiteStockfish = false;
     gameLogic->algoBlackStockfish = false;
 
 
-    UCIBridge engine;
-    engine.sendToEngine("uci");
-    engine.sendToEngine("isready");
-    engine.sendToEngine("setoption name coole shit om in te stellen value 4");
+
+    uci->sendToEngine("uci");
+    uci->sendToEngine("isready");
+    uci->sendToEngine("setoption name coole shit om in te stellen value 4");
 
     // Set the moves at beginning (rest will automatic after Move)
     precompute();
