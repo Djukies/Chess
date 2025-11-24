@@ -81,7 +81,7 @@ void findDifference(Board boardDupe, Board* board) {
     if (boardDupe.blackKingPos != board->blackKingPos) std::cout << "blackKingPos" << (int)board->blackKingPos << " " << (int)boardDupe.blackKingPos;
 }
 
-char intToChar(int x) {
+char intToString(int x) {
     switch (x) {
         case 0:
             return 'a';
@@ -147,7 +147,7 @@ void MoveGenerationTestRecursive(Board* board, const int depth)
         /*if (depth == maxDepth) {
             int oldPos = move & startSquareMask;
             int newPos = (move & targetSquareMask) >> 6;
-            std::cout << intToChar(intToX(oldPos)) << 8-intToY(oldPos) << intToChar(intToX(newPos)) << 8-intToY(newPos) << ": " << moveCountPerRootMove << std::endl;
+            std::cout << intToString(intToX(oldPos)) << 8-intToY(oldPos) << intToString(intToX(newPos)) << 8-intToY(newPos) << ": " << moveCountPerRootMove << std::endl;
             moveCountPerRootMove = 0;
         }*/
         /*if (!isSame(boardDupe, board)) {
@@ -156,7 +156,7 @@ void MoveGenerationTestRecursive(Board* board, const int depth)
                 for (Move moveInList: moveList) {
                     int oldPos = moveInList & startSquareMask;
                     int newPos = (moveInList & targetSquareMask) >> 6;
-                    std::cout << intToChar(intToX(oldPos)) << intToY(oldPos) + 1 << intToChar(intToX(newPos)) << intToY(newPos) + 1 << " ";
+                    std::cout << intToString(intToX(oldPos)) << intToY(oldPos) + 1 << intToString(intToX(newPos)) << intToY(newPos) + 1 << " ";
                 }
                 findDifference(boardDupe, board);
                 std::cout << std::endl;
@@ -181,9 +181,9 @@ void MoveGenerationTest(Board* board, const int depth) {
         int oldPos = move & startSquareMask;
         int newPos = (move & targetSquareMask) >> 6;
         std::string key =
-            std::string(1, intToChar(intToX(oldPos))) +
+            std::string(1, intToString(intToX(oldPos))) +
             std::to_string(8 - intToY(oldPos)) +
-            std::string(1, intToChar(intToX(newPos))) +
+            std::string(1, intToString(intToX(newPos))) +
             std::to_string(8 - intToY(newPos));
         if (moveCountPerRootMove == 0) moveCountPerRootMove++;
         perftResult.move_nodes[key] = moveCountPerRootMove;

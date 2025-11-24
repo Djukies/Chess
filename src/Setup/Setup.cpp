@@ -4,7 +4,6 @@ std::vector<std::string> separateFEN(const std::string FEN) {
     std::vector<std::string> separatedFEN = {};
     int spacePos = FEN.find(" ");
     separatedFEN.push_back(FEN.substr(0, spacePos));
-    std::cout << spacePos << " " << FEN.substr(spacePos+1, 1) << std::endl;
     separatedFEN.push_back(FEN.substr(spacePos+1, 1));
     separatedFEN.push_back(FEN.substr(spacePos+3));
 

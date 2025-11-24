@@ -95,11 +95,11 @@ void Algorithm::runMinimax(bool engineIsWhite) {
     }
 }
 
-void Algorithm::calcBestMove(int depth, bool engineIsWhite) {
+Move Algorithm::calcBestMove(int depth, bool engineIsWhite) {
+    std::cout << "ALGORITHM: WHITETOMOVE: " << engineIsWhite << std::endl;
     if (board->checkMate || board->staleMate) {
-        return;
+        return 0;
     }
-    depth = 4;
     movesSearched = 0;
     bestMovesMap.clear();
     this->searchDepth = depth;
@@ -120,11 +120,12 @@ void Algorithm::calcBestMove(int depth, bool engineIsWhite) {
     this->bestMove = bestMovesMap.front().second;
 
 
-    for (auto [eval, move] : bestMovesMap) {
-        std::cout << "Move: " << eval << ", " << intToChar(move & startSquareMask) << intToChar((move & targetSquareMask) >> 6) << std::endl;
+    /*for (auto [eval, move] : bestMovesMap) {
+        std::cout << "Move: " << eval << ", " << intToString(move & startSquareMask) << intToString((move & targetSquareMask) >> 6) << std::endl;
     }
-    std::cout << "Best Move For " << (board->whiteToMove ? "White" : "Black") << ": " << bestEval << ", " << intToChar(this->bestMove & startSquareMask) << intToChar((this->bestMove & targetSquareMask) >> 6) << ", Time Taken: " << time.count() << " ms, Moves Seached: " << movesSearched << std::endl;
-
+    std::cout << "Best Move For " << (board->whiteToMove ? "White" : "Black") << ": " << bestEval << ", " << intToString(this->bestMove & startSquareMask) << intToString((this->bestMove & targetSquareMask) >> 6) << ", Time Taken: " << time.count() << " ms, Moves Seached: " << movesSearched << std::endl;
+    */
+    return this->bestMove;
 }
 
 

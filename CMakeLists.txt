@@ -32,7 +32,9 @@ add_executable(Chess src/main.cpp
         src/Bot/Algorithm/Stockfish/Stockfish.h
         src/Bot/UCI/UCI.cpp
         src/Bot/UCI/UCI.h
-        src/Bot/Bot.cpp)
+        src/Bot/Bot.cpp
+        src/GameLogic/UCIGUI/UCIGUI.cpp
+        src/GameLogic/UCIGUI/UCIGUI.h)
 
 add_compile_options("-g -O0")
 target_link_libraries(Chess raylib)

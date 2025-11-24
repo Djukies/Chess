@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Renderer.h"
 
-Renderer::Renderer(Board* board, GameLogic* gameLogic) : board(board), gameLogic(gameLogic) {}
+Renderer::Renderer(Board* board, GameLogic* gameLogic, UCI* uci) : board(board), gameLogic(gameLogic), uci(uci) {}
 
 void Renderer::render() {
     ClearBackground(BLACK);
@@ -27,10 +27,22 @@ void Renderer::render() {
             return;
         }
         if (board->whiteToMove && board->algorithmWhite) {
-            gameLogic->letAlgoMakeMove();
+            std::string movesString = " moves";
+            for (Move mademove : board->movesMade) {
+                movesString += " " + moveToString(mademove);
+            }
+            if (movesString == " moves") {movesString = "";}
+            uci->sendToEngine("position fen " + board->startingFen + movesString);
+            uci->sendToEngine("go depth 4");
         }
         else if ((!board->whiteToMove) && board->algorithmBlack) {
-            gameLogic->letAlgoMakeMove();
+            std::string movesString = " moves";
+            for (Move mademove : board->movesMade) {
+                movesString += " " + moveToString(mademove);
+            }
+            if (movesString == " moves") {movesString = "";}
+            uci->sendToEngine("position fen " + board->startingFen + movesString);
+            uci->sendToEngine("go depth 4");
         }
     }
 }
@@ -142,7 +154,7 @@ void Renderer::onClick() {
     // Check if there already is an active piece
     if (pieceActive) {
         pieceActive = false;
-        if (!gameLogic->tryMove(activePiece, clickedSquare)) { // Check if you can make a Move to the clicked square (if not do next code (also you can't if it is its own square))
+        if (!gameLogic->tryMove(board, activePiece, clickedSquare)) { // Check if you can make a Move to the clicked square (if not do next code (also you can't if it is its own square))
             if (clickMask & (board->whitePieces | board->blackPieces)) { // If clicked on a piece (not air)
                 activePiece = clickedSquare;
                 pieceActive = true;
@@ -178,7 +190,7 @@ void Renderer::onMouseReleased() {
     // Try to make the Move
     int newPos = vector2ScreenToInt(GetMousePosition(), squareSize);
     if (pieceActive) {
-        gameLogic->tryMove(activePiece, newPos);
+        gameLogic->tryMove(board, activePiece, newPos);
     }
     holdingPiece = false;
 }

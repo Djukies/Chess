@@ -12,6 +12,7 @@
 #include "Bot/Algorithm/Algorithm.h"
 #include "Bot/Algorithm/Stockfish/Stockfish.h"
 #include "Bot/UCI/UCI.h"
+#include "GameLogic/UCIGUI/UCIGUI.h"
 
 
 int main() {
@@ -32,9 +33,10 @@ int main() {
     auto* algorithmWhite = new Algorithm(board);
     auto* algorithmBlack = new Algorithm(board);
     auto* gameLogic = new GameLogic(board, algorithmWhite, algorithmBlack);
-    auto* renderer = new Renderer(board, gameLogic);
-    auto* debug = new Debug(renderer, board, gameLogic);
     auto* uci = new UCI();
+    auto* ucigui = new UCIGUI();
+    auto* renderer = new Renderer(board, gameLogic, uci);
+    auto* debug = new Debug(renderer, board, gameLogic);
     debug->fen = FEN;
     gameLogic->algoWhiteStockfish = false;
     gameLogic->algoBlackStockfish = false;
@@ -43,7 +45,6 @@ int main() {
 
     uci->sendToEngine("uci");
     uci->sendToEngine("isready");
-    uci->sendToEngine("setoption name coole shit om in te stellen value 4");
 
     // Set the moves at beginning (rest will automatic after Move)
     precompute();
@@ -61,7 +62,14 @@ int main() {
     while (!WindowShouldClose())
     {
         // Be able to undo Moves (only if key pressed)
-        gameLogic->undoMoves();
+        gameLogic->undoMoves(board);
+
+        ucigui->checkForCommands(uci->receiveFromEngine());
+
+        if (ucigui->foundBestMove) {
+            std::cout << "Found best move: " << ucigui->getBestMove() << std::endl;
+            gameLogic->tryMove(board, charToInt(ucigui->bestMove.substr(0, 2)), charToInt(ucigui->bestMove.substr(2, 2)));
+        }
 
         // All the rendering
         BeginDrawing();

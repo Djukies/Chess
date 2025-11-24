@@ -5,6 +5,7 @@
 #include "../GameLogic/GameLogic.h"
 #include "../GameLogic/BitboardUtility/BitboardUtility.h"
 #include "cmath"
+#include "../Bot/UCI/UCI.h"
 
 
 class Renderer {
@@ -48,6 +49,7 @@ private:
     int squareSize = 32;
     Board* board;
     GameLogic* gameLogic;
+    UCI* uci;
 
     integer activePiece = 0;
     bool pieceActive = false;
@@ -57,7 +59,7 @@ private:
 
 
 public:
-    explicit Renderer(Board* board, GameLogic* gameLogic);
+    explicit Renderer(Board* board, GameLogic* gameLogic, UCI* uci);
     void render();
     void drawBitBoard(bit_board bitBoard);
 };

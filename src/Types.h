@@ -39,6 +39,18 @@ const Move startSquareMask = 0b0000000000111111;
 const Move targetSquareMask = 0b0000111111000000;
 const Move flagMask = 0b1111000000000000;
 
+inline integer getStartsquare(Move move) {
+    return move & startSquareMask;
+}
+
+inline integer getTargetsquare(Move move) {
+    return (move & targetSquareMask) >> 6;
+}
+
+inline integer getFlag(Move move) {
+    return (move & flagMask) >> 12;
+}
+
 const std::vector<int> pieceValues = {
     1,
     3,
@@ -133,7 +145,7 @@ inline integer charToInt(std::string pos) {
     return (rank * 8) + file;
 }
 
-inline std::string intToChar(integer pos) {
+inline std::string intToString(integer pos) {
     // Basic validation: must be at least 2 characters (e.g., "a1")
     Vector2 posVector = intToVector2(pos);
 
@@ -149,6 +161,11 @@ inline std::string intToChar(integer pos) {
     rankStr = rankChar;
 
     return fileStr + rankStr;
+}
+
+inline std::string moveToString(Move move) {
+    if (move == 0) return "invalidmove";
+    return intToString(getStartsquare(move)) + intToString(getTargetsquare(move));
 }
 
 inline int intToX(int pos) {

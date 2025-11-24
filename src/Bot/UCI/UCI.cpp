@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include "../../GameLogic/GameLogic.h"
+
 void UCI::sendToEngine(const std::string& command) {
     std::istringstream iss(command);
     std::string cmd;
@@ -35,22 +37,26 @@ void UCI::sendToEngine(const std::string& command) {
 
 void UCI::handleUCI() {
     // Send engine identification
-    std::cout << "id name DjukeUCI 1.0" << std::endl;
-    std::cout << "id author Djukies" << std::endl;
+    std::cout << "ENGINE: " << "id name DjukeUCI 1.0" << std::endl;
+    std::cout << "ENGINE: " << "id author Djukies" << std::endl;
+    sendToGUI("id name DjukeUCI 1.0");
+    sendToGUI("id author Djukies");
 
     // Send available options
-    /*std::cout << "option name Hash type spin default 128 min 1 max 16384" << std::endl;
-    std::cout << "option name Threads type spin default 1 min 1 max 512" << std::endl;
-    std::cout << "option name Ponder type check default false" << std::endl;*/
+    /*std::cout << "ENGINE: " << "option name Hash type spin default 128 min 1 max 16384" << std::endl;
+    std::cout << "ENGINE: " << "option name Threads type spin default 1 min 1 max 512" << std::endl;
+    std::cout << "ENGINE: " << "option name Ponder type check default false" << std::endl;*/
 
-    std::cout << "uciok" << std::endl;
+    std::cout << "ENGINE: " << "uciok" << std::endl;
+    sendToGUI("uciok");
 
     initEngine();
 }
 
 void UCI::handleIsReady() {
     isReady();
-    std::cout << "readyok" << std::endl;
+    std::cout << "ENGINE: " << "readyok" << std::endl;
+    sendToGUI("readyok");
 }
 
 void UCI::handleSetOption(std::istringstream& iss) {
@@ -154,4 +160,59 @@ void UCI::handleStop() {
 
 void UCI::handleQuit() {
     quit();
+}
+
+
+void UCI::initEngine() {
+    bot = new Bot();
+    bot->sendToGUI = [this](const std::string& msg) {
+        this->sendToGUI(msg);    // your UCI's method
+    };
+}
+
+void UCI::setOption(const std::string& name, const std::string& value) {
+    // Set engine option (Hash, Threads, etc.)
+    std::cerr << "ENGINE: " << "Setting option: " << name << " = " << value << std::endl;
+}
+
+void UCI::setupPosition(const std::string& fen, const std::vector<std::string>& moves) {
+    // Set up the board position from FEN and apply moves
+    std::cerr << "ENGINE: " << "Position FEN: " << fen << std::endl;
+    std::cerr << "ENGINE: " << "Moves: ";
+    for (const auto& move : moves) {
+        std::cerr << "ENGINE: " << move << " ";
+    }
+    std::cerr << "ENGINE: " << std::endl;
+
+    bot->setUpBoard(fen, moves);
+}
+
+void UCI::startSearch(int depth, int movetime, int wtime, int btime, int winc, int binc, int movestogo, bool infinite) {
+    // Start searching for best move
+    std::cerr << "ENGINE: " << "Starting search with depth=" << depth << ", movetime=" << movetime << std::endl;
+
+    // Example output - replace with actual search
+    // During search, you can output:
+    // std::cout << "ENGINE: " << "info depth 5 score cp 20 nodes 1000 time 500 pv e2e4 e7e5" << std::endl;
+
+    bot->findBestMove(depth);
+}
+
+void UCI::stopSearch() {
+    // Stop the current search
+    std::cerr << "ENGINE: " << "Stopping search" << std::endl;
+}
+
+void UCI::isReady() {
+    // Perform any necessary initialization to be ready
+}
+
+void UCI::newGame() {
+    // Reset engine for new game
+    std::cerr << "ENGINE: " << "New game started" << std::endl;
+}
+
+void UCI::quit() {
+    // Clean up and exit
+    std::cerr << "ENGINE: " << "Quitting engine" << std::endl;
 }

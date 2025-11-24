@@ -2,12 +2,13 @@
 #include "MoveGeneration/MoveGeneration.h"
 #include <iostream>
 
-GameLogic::GameLogic(Board *board, Algorithm* algorithmWhite, Algorithm* algorithmBlack) : board(board), algorithmWhite(algorithmWhite), algorithmBlack(algorithmBlack) {
+GameLogic::GameLogic(Board *board, Algorithm* algorithmWhite, Algorithm* algorithmBlack) : algorithmWhite(algorithmWhite), algorithmBlack(algorithmBlack) {
     Zobrist::init();
-    board->zobristKey = computeHash();
+    board->zobristKey = computeHash(board);
+    firstMadMove = board->fullMoves;
 }
 
-uint64_t GameLogic::computeHash() const {
+uint64_t GameLogic::computeHash(Board* board) const {
     uint64_t hash = 0;
 
     // For each piece on board (example)
@@ -36,7 +37,7 @@ uint64_t GameLogic::computeHash() const {
     return hash;
 }
 
-bool GameLogic::isThreeFoldRepetition() const {
+bool GameLogic::isThreeFoldRepetition(Board* board) const {
     int count = 0;
     for (uint64_t hash : board->history) {
         if (hash == board->zobristKey)
@@ -49,7 +50,7 @@ bool GameLogic::isThreeFoldRepetition() const {
 
 
 
-void GameLogic::undoMoves() {
+void GameLogic::undoMoves(Board* board) {
     if (!IsKeyPressed(KEY_LEFT_SHIFT)) {
         if (IsKeyPressed(KEY_LEFT)) {
 
@@ -71,15 +72,15 @@ void GameLogic::undoMoves() {
 }
 
 
-bool GameLogic::tryMove(uint8_t oldPos, uint8_t newPos) {
+bool GameLogic::tryMove(Board* board, uint8_t oldPos, uint8_t newPos) {
     Move move = getMove(oldPos, newPos, board->movesMap);
     if (move != 0) {
         if ((move & flagMask) >> 12 >= 4) {
             std::cout << "PROMOTING" << std::endl;
         }
         makeMove(board, move);
-        board->zobristKey = computeHash();
-        if (isThreeFoldRepetition()) {
+        board->zobristKey = computeHash(board);
+        if (isThreeFoldRepetition(board)) {
             std::cout << "REPETIZING" << std::endl;
         }
         board->history.push_back(board->zobristKey);
@@ -114,10 +115,10 @@ bool GameLogic::tryMove(uint8_t oldPos, uint8_t newPos) {
 
 
 
-void GameLogic::letAlgoMakeMove() {
+void GameLogic::letAlgoMakeMove(Board* board) {
     if (board->whiteToMove) {
         if (algoWhiteStockfish) {
-            letAlgoStockfishMakeMove();
+            letAlgoStockfishMakeMove(board);
             return;
         }
         if (algorithmWhite->bestMove == 0) {
@@ -125,7 +126,7 @@ void GameLogic::letAlgoMakeMove() {
         }
     } else {
         if (algoBlackStockfish) {
-            letAlgoStockfishMakeMove();
+            letAlgoStockfishMakeMove(board);
             return;
         }
         if (algorithmBlack->bestMove == 0) {
@@ -168,11 +169,11 @@ void GameLogic::letAlgoMakeMove() {
     }
 }
 
-void GameLogic::letAlgoStockfishMakeMove() {
+void GameLogic::letAlgoStockfishMakeMove(Board* board) {
     std::string move = StockfishGetMove(board->movesMade, board->startingFen);
     integer from = charToInt(move.substr(0, 2));
     integer to = charToInt(move.substr(2, 2));
-    std::cout << tryMove(from, to) << std::endl;
+    std::cout << tryMove(board, from, to) << std::endl;
 }
 
 

@@ -314,7 +314,7 @@ std::string StockfishGetMove(std::vector<Move> madeMoves, std::string fen) {
         std::string madeMovesString = "";
         for (Move move : madeMoves) {
             //std::cout << (int)(move & startSquareMask) << " " << (int)((move & targetSquareMask) >> 6) << std::endl;
-            std::string moveStr = intToChar(move & startSquareMask) + intToChar((move & targetSquareMask) >> 6);
+            std::string moveStr = intToString(move & startSquareMask) + intToString((move & targetSquareMask) >> 6);
             madeMovesString += " " + moveStr;
         }
         std::cout << madeMovesString << std::endl;
