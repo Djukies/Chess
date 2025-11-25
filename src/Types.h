@@ -52,11 +52,11 @@ inline integer getFlag(Move move) {
 }
 
 const std::vector<int> pieceValues = {
-    1,
-    3,
-    3,
-    5,
-    9,
+    100,
+    300,
+    290,
+    500,
+    900,
     0,
     0
 };

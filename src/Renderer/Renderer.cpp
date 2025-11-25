@@ -33,7 +33,7 @@ void Renderer::render() {
             }
             if (movesString == " moves") {movesString = "";}
             uci->sendToEngine("position fen " + board->startingFen + movesString);
-            uci->sendToEngine("go depth 4");
+            uci->sendToEngine("go depth 1");
         }
         else if ((!board->whiteToMove) && board->algorithmBlack) {
             std::string movesString = " moves";
@@ -42,7 +42,7 @@ void Renderer::render() {
             }
             if (movesString == " moves") {movesString = "";}
             uci->sendToEngine("position fen " + board->startingFen + movesString);
-            uci->sendToEngine("go depth 4");
+            uci->sendToEngine("go depth 1");
         }
     }
 }
