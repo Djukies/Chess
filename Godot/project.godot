@@ -11,8 +11,13 @@ config_version=5
 [application]
 
 config/name="Chess UI"
-config/features=PackedStringArray("4.7", "GL Compatibility")
-config/icon="res://icon.svg"
+run/main_scene="uid://bs2alq0qdd8j6"
+config/features=PackedStringArray("4.7", "C#", "GL Compatibility")
+config/icon="res://Assets/icon.svg"
+
+[autoload]
+
+Global="*uid://btjs7r1p0dy8p"
 
 [display]
 

@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://du7jih2qxtxme"]
+
+[ext_resource type="PackedScene" uid="uid://53gj8jy6b0ue" path="res://Scenes/board.tscn" id="1_8h24f"]
+
+[node name="AspectRatioContainer" type="AspectRatioContainer" unique_id=2035122015]
+offset_right = 1145.0
+offset_bottom = 648.0
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="." unique_id=1761870692]
+layout_mode = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer" unique_id=1308059553]
+handle_input_locally = false
+size = Vector2i(648, 648)
+size_2d_override = Vector2i(2048, 2048)
+size_2d_override_stretch = true
+render_target_update_mode = 4
+
+[node name="Board" parent="SubViewportContainer/SubViewport" unique_id=578337094 instance=ExtResource("1_8h24f")]
