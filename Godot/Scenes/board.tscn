@@ -1,0 +1,383 @@
+[gd_scene format=3 uid="uid://53gj8jy6b0ue"]
+
+[ext_resource type="Shader" uid="uid://wpiciy2b85m6" path="res://Shaders/WhiteSquare.gdshader" id="1_2wvcj"]
+[ext_resource type="Shader" uid="uid://bpmsjj76u3n1u" path="res://Shaders/BlackSquare.gdshader" id="2_uh3b8"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_wynjb"]
+shader = ExtResource("1_2wvcj")
+shader_parameter/color = Color(0.99394745, 0.8264529, 0.6625793, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pj55w"]
+shader = ExtResource("2_uh3b8")
+shader_parameter/color = Color(0.38936672, 0.21296161, 0.033550646, 1)
+
+[node name="Board" type="AspectRatioContainer" unique_id=574990630]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=52739745]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="RowA" type="HBoxContainer" parent="VBoxContainer" unique_id=1391285090]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="A1" type="ColorRect" parent="VBoxContainer/RowA" unique_id=697977071]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="A2" type="ColorRect" parent="VBoxContainer/RowA" unique_id=539039001]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="A3" type="ColorRect" parent="VBoxContainer/RowA" unique_id=23238731]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="A4" type="ColorRect" parent="VBoxContainer/RowA" unique_id=1541855471]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="A5" type="ColorRect" parent="VBoxContainer/RowA" unique_id=249766757]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="A6" type="ColorRect" parent="VBoxContainer/RowA" unique_id=23512592]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="A7" type="ColorRect" parent="VBoxContainer/RowA" unique_id=1478872933]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="A8" type="ColorRect" parent="VBoxContainer/RowA" unique_id=1969991333]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RowB" type="HBoxContainer" parent="VBoxContainer" unique_id=497552482]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="C1" type="ColorRect" parent="VBoxContainer/RowB" unique_id=850242560]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="C2" type="ColorRect" parent="VBoxContainer/RowB" unique_id=1344244215]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="C3" type="ColorRect" parent="VBoxContainer/RowB" unique_id=2013394357]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="C4" type="ColorRect" parent="VBoxContainer/RowB" unique_id=1591356441]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="C5" type="ColorRect" parent="VBoxContainer/RowB" unique_id=2106680453]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="C6" type="ColorRect" parent="VBoxContainer/RowB" unique_id=175208817]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="C7" type="ColorRect" parent="VBoxContainer/RowB" unique_id=1537040958]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="C8" type="ColorRect" parent="VBoxContainer/RowB" unique_id=1477652892]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RowC" type="HBoxContainer" parent="VBoxContainer" unique_id=1066485890]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="C1" type="ColorRect" parent="VBoxContainer/RowC" unique_id=516761775]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="C2" type="ColorRect" parent="VBoxContainer/RowC" unique_id=1194440931]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="C3" type="ColorRect" parent="VBoxContainer/RowC" unique_id=1405678636]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="C4" type="ColorRect" parent="VBoxContainer/RowC" unique_id=410692010]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="C5" type="ColorRect" parent="VBoxContainer/RowC" unique_id=1349812530]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="C6" type="ColorRect" parent="VBoxContainer/RowC" unique_id=1811175139]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="C7" type="ColorRect" parent="VBoxContainer/RowC" unique_id=2120690620]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="C8" type="ColorRect" parent="VBoxContainer/RowC" unique_id=797439782]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RowD" type="HBoxContainer" parent="VBoxContainer" unique_id=621003140]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="D1" type="ColorRect" parent="VBoxContainer/RowD" unique_id=168067702]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="D2" type="ColorRect" parent="VBoxContainer/RowD" unique_id=425242541]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="D3" type="ColorRect" parent="VBoxContainer/RowD" unique_id=2098391654]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="D4" type="ColorRect" parent="VBoxContainer/RowD" unique_id=1292122594]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="D5" type="ColorRect" parent="VBoxContainer/RowD" unique_id=1841764300]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="D6" type="ColorRect" parent="VBoxContainer/RowD" unique_id=1095926739]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="D7" type="ColorRect" parent="VBoxContainer/RowD" unique_id=1835123212]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="D8" type="ColorRect" parent="VBoxContainer/RowD" unique_id=2127430862]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RowE" type="HBoxContainer" parent="VBoxContainer" unique_id=566116738]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="E1" type="ColorRect" parent="VBoxContainer/RowE" unique_id=790220803]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="E2" type="ColorRect" parent="VBoxContainer/RowE" unique_id=876129128]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="E3" type="ColorRect" parent="VBoxContainer/RowE" unique_id=2017287923]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="E4" type="ColorRect" parent="VBoxContainer/RowE" unique_id=928903827]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="E5" type="ColorRect" parent="VBoxContainer/RowE" unique_id=455151836]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="E6" type="ColorRect" parent="VBoxContainer/RowE" unique_id=326388752]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="E7" type="ColorRect" parent="VBoxContainer/RowE" unique_id=1443754469]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="E8" type="ColorRect" parent="VBoxContainer/RowE" unique_id=748578619]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RowF" type="HBoxContainer" parent="VBoxContainer" unique_id=823406148]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="F1" type="ColorRect" parent="VBoxContainer/RowF" unique_id=94975153]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="F2" type="ColorRect" parent="VBoxContainer/RowF" unique_id=747471736]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="F3" type="ColorRect" parent="VBoxContainer/RowF" unique_id=665603358]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="F4" type="ColorRect" parent="VBoxContainer/RowF" unique_id=508044309]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="F5" type="ColorRect" parent="VBoxContainer/RowF" unique_id=1095315328]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="F6" type="ColorRect" parent="VBoxContainer/RowF" unique_id=1320000538]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="F7" type="ColorRect" parent="VBoxContainer/RowF" unique_id=364579337]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="F8" type="ColorRect" parent="VBoxContainer/RowF" unique_id=242191912]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RowG" type="HBoxContainer" parent="VBoxContainer" unique_id=31072667]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="G1" type="ColorRect" parent="VBoxContainer/RowG" unique_id=2128515514]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="G2" type="ColorRect" parent="VBoxContainer/RowG" unique_id=448682664]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="G3" type="ColorRect" parent="VBoxContainer/RowG" unique_id=1673779633]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="G4" type="ColorRect" parent="VBoxContainer/RowG" unique_id=912606250]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="G5" type="ColorRect" parent="VBoxContainer/RowG" unique_id=256659142]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="G6" type="ColorRect" parent="VBoxContainer/RowG" unique_id=470191882]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="G7" type="ColorRect" parent="VBoxContainer/RowG" unique_id=1270879890]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="G8" type="ColorRect" parent="VBoxContainer/RowG" unique_id=1758348641]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RowH" type="HBoxContainer" parent="VBoxContainer" unique_id=157831274]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="H1" type="ColorRect" parent="VBoxContainer/RowH" unique_id=1702126554]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="H2" type="ColorRect" parent="VBoxContainer/RowH" unique_id=1872294803]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="H3" type="ColorRect" parent="VBoxContainer/RowH" unique_id=449468612]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="H4" type="ColorRect" parent="VBoxContainer/RowH" unique_id=481160620]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="H5" type="ColorRect" parent="VBoxContainer/RowH" unique_id=1950895451]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="H6" type="ColorRect" parent="VBoxContainer/RowH" unique_id=993274387]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="H7" type="ColorRect" parent="VBoxContainer/RowH" unique_id=1925055018]
+material = SubResource("ShaderMaterial_pj55w")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="H8" type="ColorRect" parent="VBoxContainer/RowH" unique_id=1422813746]
+material = SubResource("ShaderMaterial_wynjb")
+layout_mode = 2
+size_flags_horizontal = 3
