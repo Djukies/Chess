@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://cusheqtw1fbs1"]
+
+[ext_resource type="Script" uid="uid://mhx5gwku8iwp" path="res://test.gd" id="1_8uh7m"]
+[ext_resource type="Texture2D" uid="uid://duxqxx76wix6c" path="res://Assets/icon.svg" id="1_37kl0"]
+
+[node name="Node2D" type="Node2D" unique_id=2051572539]
+script = ExtResource("1_8uh7m")
+
+[node name="GDExample" type="GDExample" parent="." unique_id=1501595030]
+amplitude = 81.48
+position = Vector2(162.95944, 156.84355)
+texture = ExtResource("1_37kl0")
+centered = false
+
+[connection signal="position_changed" from="GDExample" to="." method="_on_gd_example_position_changed"]

@@ -27,7 +27,11 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1166acc1-caf9-4822-9c79-b5d0e8a8a1c6" name="Changes" comment="" />
+    <list default="true" id="1166acc1-caf9-4822-9c79-b5d0e8a8a1c6" name="Changes" comment="fixed problems, idk">
+      <change afterPath="$PROJECT_DIR$/../.gitmodules" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../godot-cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.gitignore" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -83,7 +87,7 @@
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "git-widget-placeholder": "master",
     "git.auto.fetch.suggestion.counter": "1",
-    "last_opened_file_path": "/home/aron/CLionProjects/Chess",
+    "last_opened_file_path": "/home/aron/Programmeren/Chess/src",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -191,6 +195,10 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="fixed problems, idk" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed problems, idk" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
