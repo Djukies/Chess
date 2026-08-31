@@ -6,7 +6,7 @@ import sys
 # https://scons.org/documentation.html
 
 # This lets SCons know that we're using godot-cpp, from the godot-cpp folder.
-env = SConscript("godot-cpp/SConstruct")
+env = SConscript("godot-cpp/SConstruct", exports={"api_version": "4.5"})
 
 # Configures the 'src' directory as a source for header files.
 env.Append(CPPPATH=["src/"])

@@ -65,4 +65,6 @@ script = ExtResource("4_shhme")
 [node name="MoveGeneration" type="Node" parent="." unique_id=955192607]
 script = ExtResource("5_s4i1f")
 
+[node name="GDMoveGenerator" type="GDMoveGenerator" parent="." unique_id=164610118]
+
 [connection signal="PieceClicked" from="Pieces" to="." method="OnPieceClicked"]

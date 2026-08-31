@@ -1,10 +1,11 @@
 #include "register_types.h"
 
-#include "gdextension.h"
-
 #include <gdextension_interface.h>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
+
+#include "gdextension.h"
+#include "gd_move_generator.h"
 
 
 using namespace godot;
@@ -15,6 +16,7 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
     }
 
     GDREGISTER_CLASS(GDExample);
+    GDREGISTER_CLASS(GDMoveGenerator)
 }
 
 void uninitialize_example_module(ModuleInitializationLevel p_level) {

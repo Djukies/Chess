@@ -1,25 +1,24 @@
 using Godot;
-using System;
 using Godot.Collections;
+using Godot.NativeInterop;
+using Array = System.Array;
 
 public partial class Board : Node2D
 {
-    private MoveGeneration moveGenerator;
+    private Node moveGenerator;
     private TileMapLayer movesTiles;
 
     public override void _Ready()
     {
         base._Ready();
-        moveGenerator = GetNode<MoveGeneration>("MoveGeneration");
-        movesTiles = GetNode<TileMapLayer>("Moves");
+        moveGenerator = GetNodeOrNull<Node>("GDMoveGenerator");
+        movesTiles = GetNodeOrNull<TileMapLayer>("Moves");
     }
 
     private void OnPieceClicked(Vector2I position)
     {
         GD.Print(position);
-        Array<int> moves = moveGenerator.GenerateMoves();
-        GD.Print(moves);
-        GD.Print(Global.IntToVector(moves[0]));
+        int[] moves = moveGenerator.Call("generate_moves", Global.VectorToInt(position)).AsInt32Array();
         foreach (var move in moves)
         {
             Vector2I movePos = Global.IntToVector(move);
