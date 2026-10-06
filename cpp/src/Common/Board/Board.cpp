@@ -15,10 +15,10 @@ Board* loadBoardFromFEN(const std::string fen) {
 }
 
 void replacePosToBitboards(Board* board, integer oldPos, integer newPos) {
-    bit_board oldPosMask = 1ULL << oldPos;
-    bit_board newPosMask = 1ULL << newPos;
+    bitboard oldPosMask = 1ULL << oldPos;
+    bitboard newPosMask = 1ULL << newPos;
 
-    bit_board mask = oldPosMask | newPosMask;
+    bitboard mask = oldPosMask | newPosMask;
 
 
     if (oldPosMask & board->pawns) {
@@ -48,7 +48,7 @@ void replacePosToBitboards(Board* board, integer oldPos, integer newPos) {
 }
 
 void removeFromBitboards(Board* board, integer pos) {
-    bit_board mask = 1ULL << pos;
+    bitboard mask = 1ULL << pos;
     board->blackPieces &= ~mask;
     board->whitePieces &= ~mask;
 
@@ -61,7 +61,7 @@ void removeFromBitboards(Board* board, integer pos) {
 }
 
 void addToBitboards(Board* board, integer pos, Piece pieceType, bool team) {
-    bit_board mask = 1ULL << pos;
+    bitboard mask = 1ULL << pos;
     if (team == TEAMWHITE) board->whitePieces |= mask;
     else board->blackPieces |= mask;
 

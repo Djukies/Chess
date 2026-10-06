@@ -13,31 +13,32 @@ void generatePromotions(integer startSquare, integer targetSquare, std::vector<M
 
 std::vector<Move> calculatePawnMoves(Board* board) {
     std::vector<Move> moves;
-    bit_board pawns = board->pawns & board->friendlyPieces;
+    bitboard pawns = board->pawns & board->friendlyPieces;
     int pushDir = board->whiteToMove ? -1 : 1;
 
-    bit_board promotionRankMask = board->whiteToMove ? rank1 : rank8;
-    bit_board singlePush = shift(pawns, pushDir*8) & board->emptySquares;
+    bitboard promotionRankMask = board->whiteToMove ? rank1 : rank8;
+    bitboard singlePush = shift(pawns, pushDir*8) & board->emptySquares;
 
-    bit_board doublePushTargetRank = board->whiteToMove ? rank5 : rank4;
-    bit_board doublePush = shift(singlePush, pushDir*8) & doublePushTargetRank & board->emptySquares & board->checkRay;
-    bit_board singlePushNoPromotions = singlePush & ~promotionRankMask & board->checkRay;
-    bit_board pushPromotions = singlePush & promotionRankMask;
+    bitboard doublePushTargetRank = board->whiteToMove ? rank5 : rank4;
+    bitboard doublePush = shift(singlePush, pushDir*8) & doublePushTargetRank & board->emptySquares & board->checkRay;
+    bitboard singlePushNoPromotions = singlePush & ~promotionRankMask & board->checkRay;
+    bitboard pushPromotions = singlePush & promotionRankMask;
 
-    bit_board captureEdgePreventionMask1 = board->whiteToMove ? notFileH : notFileA;
-    bit_board captureEdgePreventionMask2 = board->whiteToMove ? notFileA : notFileH;
+    bitboard captureEdgePreventionMask1 = board->whiteToMove ? notFileH : notFileA;
+    bitboard captureEdgePreventionMask2 = board->whiteToMove ? notFileA : notFileH;
 
-    bit_board enPassantSquare = 1ULL << (board->enPassantSquare + 8*pushDir);
+    bitboard enPassantSquare = 1ULL << (board->enPassantSquare + 8*pushDir);
 
-    bit_board captureA = shift(pawns & captureEdgePreventionMask1, pushDir * 7) & (board->enemyPieces | enPassantSquare) & board->checkRay;
-    bit_board captureB = shift(pawns & captureEdgePreventionMask2, pushDir * 9) & (board->enemyPieces | enPassantSquare) & board->checkRay;
+    bitboard captureA = shift(pawns & captureEdgePreventionMask1, pushDir * 7) & (board->enemyPieces | enPassantSquare) & board->checkRay;
+    bitboard captureB = shift(pawns & captureEdgePreventionMask2, pushDir * 9) & (board->enemyPieces | enPassantSquare) & board->checkRay;
 
-    bit_board capturePromotionsA = captureA & promotionRankMask;
-    bit_board capturePromotionsB = captureB & promotionRankMask;
+    bitboard capturePromotionsA = captureA & promotionRankMask;
+    bitboard capturePromotionsB = captureB & promotionRankMask;
 
     captureA &= ~promotionRankMask;
     captureB &= ~promotionRankMask;
 
+    board->pawnMoves |= singlePush | doublePush | captureA | captureB;
 
     while (singlePushNoPromotions != 0) {
         int targetSquare = getIndex(singlePushNoPromotions);
@@ -109,7 +110,7 @@ std::vector<Move> calculatePawnMoves(Board* board) {
 
 std::vector<Move> calculateKnightMoves(Board* board) {
     std::vector<Move> moves;
-    bit_board knights = board->knights & board->friendlyPieces;
+    bitboard knights = board->knights & board->friendlyPieces;
     while (knights != 0) {
         integer startSquare = getIndex(knights);
         knights &= knights-1;
@@ -117,7 +118,8 @@ std::vector<Move> calculateKnightMoves(Board* board) {
             if (containsSquare(board->pinnedPieces, startSquare)) {
                 continue;
             }
-            bit_board possibleMoves = possibleKnightMoves[startSquare] & (board->emptySquares | board->enemyPieces) & board->checkRay;
+            bitboard possibleMoves = possibleKnightMoves[startSquare] & (board->emptySquares | board->enemyPieces) & board->checkRay;
+            board->knightMoves |= possibleMoves;
             while (possibleMoves != 0) {
                 integer targetSquare = getIndex(possibleMoves);
                 possibleMoves &= possibleMoves - 1;
@@ -131,7 +133,8 @@ std::vector<Move> calculateKnightMoves(Board* board) {
 
 std::vector<Move> calculateKingMoves(Board* board) {
     std::vector<Move> moves;
-    bit_board possibleMoves = possibleKingMoves[board->friendlyKingPos] & (board->emptySquares | board->enemyPieces) & (~board->opponentControlledSquares);
+    bitboard possibleMoves = possibleKingMoves[board->friendlyKingPos] & (board->emptySquares | board->enemyPieces) & (~board->opponentControlledSquares);
+    board->kingMoves |= possibleMoves;
     while (possibleMoves != 0) {
         integer targetSquare = getIndex(possibleMoves);
         possibleMoves &= possibleMoves-1;
@@ -145,22 +148,26 @@ std::vector<Move> calculateKingMoves(Board* board) {
 
                 if ((0b01100000ULL << (8*7) & board->allPieces) == 0 && (0b01110000ULL << (8*7) & board->opponentControlledSquares) == 0) {
                     moves.push_back(create_move(board->friendlyKingPos, board->friendlyKingPos + 2, CastleFlag));
+                    board->kingMoves |= 1ULL << (board->friendlyKingPos + 2);
                 }
             }
             if (board->castleRights & 0b00000010ULL) {
                 if (((0b00001110ULL << (8*7)) & board->allPieces) == 0 && ((0b00011100ULL << (8*7)) & board->opponentControlledSquares) == 0) {
                     moves.push_back(create_move(board->friendlyKingPos, board->friendlyKingPos - 2, CastleFlag));
+                    board->kingMoves |= 1ULL << (board->friendlyKingPos - 2);
                 }
             }
         } else if (!board->whiteToMove && (board->castleRights & 0b00001100ULL) != 0) {
             if (board->castleRights & 0b00000100ULL) {
                 if ((0b01100000ULL & board->allPieces) == 0 && (0b01110000ULL & board->opponentControlledSquares) == 0) {
                     moves.push_back(create_move(board->friendlyKingPos, board->friendlyKingPos + 2, CastleFlag));
+                    board->kingMoves |= 1ULL << (board->friendlyKingPos + 2);
                 }
             }
             if (board->castleRights & 0b00001000ULL) {
                 if (((0b00001110ULL) & board->allPieces) == 0 && ((0b00011100ULL) & board->opponentControlledSquares) == 0) {
                     moves.push_back(create_move(board->friendlyKingPos, board->friendlyKingPos - 2, CastleFlag));
+                    board->kingMoves |= 1ULL << (board->friendlyKingPos - 2);
                 }
             }
         }
@@ -192,27 +199,44 @@ std::vector<Move> calculateSlidingMoves(Board* board, integer pos, int startDir,
 
 std::vector<Move> calculateSlidingPieceMoves(Board* board) {
     std::vector<Move> moves;
-    bit_board diagonalSliders = board->friendlyPieces & (board->bishops | board->queens);
-    bit_board othogonalSliders = board->friendlyPieces & (board->rooks | board->queens);
+    bitboard bishops = board->friendlyPieces & board->bishops;
+    bitboard rooks = board->friendlyPieces & board->rooks;
+    bitboard queens = board->friendlyPieces & board->queens;
 
-    while (diagonalSliders != 0) {
-        int startSquare = getIndex(diagonalSliders);
-        diagonalSliders &= diagonalSliders-1;
+    while (bishops != 0) {
+        int startSquare = getIndex(bishops);
+        bishops &= bishops-1;
         std::vector<Move> movesOfPiece = calculateSlidingMoves(board, startSquare, 4, 8);
+        for (auto move : movesOfPiece) {
+            board->bishopMoves |= 1ULL << getTargetsquare(move);
+        }
         moves.insert(moves.end(), movesOfPiece.begin(), movesOfPiece.end());
     }
-    while (othogonalSliders != 0) {
-        int startSquare = getIndex(othogonalSliders);
-        othogonalSliders &= othogonalSliders-1;
+
+    while (rooks != 0) {
+        int startSquare = getIndex(rooks);
+        rooks &= rooks-1;
         std::vector<Move> movesOfPiece = calculateSlidingMoves(board, startSquare, 0, 4);
+        for (auto move : movesOfPiece) {
+            board->rookMoves |= 1ULL << getTargetsquare(move);
+        }
+        moves.insert(moves.end(), movesOfPiece.begin(), movesOfPiece.end());
+    }
+    while (queens != 0) {
+        int startSquare = getIndex(queens);
+        queens &= queens-1;
+        std::vector<Move> movesOfPiece = calculateSlidingMoves(board, startSquare, 0, 8);
+        for (auto move : movesOfPiece) {
+            board->queenMoves |= 1ULL << getTargetsquare(move);
+        }
         moves.insert(moves.end(), movesOfPiece.begin(), movesOfPiece.end());
     }
 
     return moves;
 }
 
-bit_board calculateSlidingMovesBitboard(Board* board, integer pos, int startDir, int endDir) {
-    bit_board moves = 0ULL;
+bitboard calculateSlidingMovesBitboard(Board* board, integer pos, int startDir, int endDir) {
+    bitboard moves = 0ULL;
     for (int dir = startDir; dir < endDir; dir++) {
         for (int distance = 1; distance <= distanceToEdge[pos][dir]; distance++) {
             if (containsSquare(board->allPieces, pos + directions[dir] * distance)) {
@@ -226,28 +250,28 @@ bit_board calculateSlidingMovesBitboard(Board* board, integer pos, int startDir,
     return moves;
 }
 
-bit_board calculateSlidingPieceMovesAttackMap(Board* board) {
-    bit_board moves = 0ULL;
-    bit_board diagonalSliders = board->enemyPieces & (board->bishops | board->queens);
-    bit_board othogonalSliders = board->enemyPieces & (board->rooks | board->queens);
+bitboard calculateSlidingPieceMovesAttackMap(Board* board) {
+    bitboard moves = 0ULL;
+    bitboard diagonalSliders = board->enemyPieces & (board->bishops | board->queens);
+    bitboard othogonalSliders = board->enemyPieces & (board->rooks | board->queens);
 
     while (diagonalSliders != 0) {
         int startSquare = getIndex(diagonalSliders);
         diagonalSliders &= diagonalSliders-1;
-        bit_board movesOfPiece = calculateSlidingMovesBitboard(board, startSquare, 4, 8);
+        bitboard movesOfPiece = calculateSlidingMovesBitboard(board, startSquare, 4, 8);
         moves |= movesOfPiece;
     }
     while (othogonalSliders != 0) {
         int startSquare = getIndex(othogonalSliders);
         othogonalSliders &= othogonalSliders-1;
-        bit_board movesOfPiece = calculateSlidingMovesBitboard(board, startSquare, 0, 4);
+        bitboard movesOfPiece = calculateSlidingMovesBitboard(board, startSquare, 0, 4);
         moves |= movesOfPiece;
     }
 
     return moves;
 }
 
-bit_board calculatePawnAttacks(bit_board pawns, bool isWhiteToMove) {
+bitboard calculatePawnAttacks(bitboard pawns, bool isWhiteToMove) {
     // Calculated by first moving the pawns to the place they can attack (pawns << 9)
     // And then removing the A-File, because if they moved right, they can't be on the A-file
 
@@ -266,7 +290,7 @@ void calculateAttackData(Board* board) {
     }
     for (int dir = startIndex; dir < endIndex; dir++) {
         bool isDiagonal = dir >= 4;
-        bit_board slidingPieces = board->queens;
+        bitboard slidingPieces = board->queens;
         slidingPieces |= isDiagonal ? board->bishops : board->rooks;
         slidingPieces &= board->enemyPieces;
         if ((rays[board->friendlyKingPos][dir] & slidingPieces) == 0) {
@@ -274,7 +298,7 @@ void calculateAttackData(Board* board) {
         }
         integer friendlyPieceAlongRay = 0;
         int directionOffset = directions[dir];
-        bit_board rayMask = 0ULL;
+        bitboard rayMask = 0ULL;
         for (int n = 1; n <= distanceToEdge[board->friendlyKingPos][dir]; n++) {
             int pos = board->friendlyKingPos + n*directionOffset;
             rayMask |= 1ULL << pos;
@@ -311,16 +335,16 @@ void calculateAttackData(Board* board) {
     // First remove the king, so it can't hide behind himself
     board->allPieces &= ~(1ULL << board->friendlyKingPos);
 
-    bit_board opponentSlidingPieceAttacks = calculateSlidingPieceMovesAttackMap(board);
+    bitboard opponentSlidingPieceAttacks = calculateSlidingPieceMovesAttackMap(board);
 
-    bit_board friendlyKingMask = 1ULL << board->friendlyKingPos;
-    bit_board knights = board->knights & board->enemyPieces;
-    bit_board opponentKnightAttacks = 0ULL;
+    bitboard friendlyKingMask = 1ULL << board->friendlyKingPos;
+    bitboard knights = board->knights & board->enemyPieces;
+    bitboard opponentKnightAttacks = 0ULL;
 
     while (knights != 0) {
         integer startSquare = getIndex(knights);
         knights &= knights-1;
-        bit_board knightAttacks = possibleKnightMoves[startSquare];
+        bitboard knightAttacks = possibleKnightMoves[startSquare];
         opponentKnightAttacks |= knightAttacks;
         if ((knightAttacks & friendlyKingMask) != 0) {
             board->checkRay |= 1ULL << startSquare;
@@ -329,16 +353,16 @@ void calculateAttackData(Board* board) {
         }
     }
 
-    bit_board pawnAttacks = calculatePawnAttacks(board->pawns & board->enemyPieces, !board->whiteToMove);
+    bitboard pawnAttacks = calculatePawnAttacks(board->pawns & board->enemyPieces, !board->whiteToMove);
 
     if (containsSquare(pawnAttacks, board->friendlyKingPos)) {
         board->inDoubleCheck = board->inCheck;
         board->inCheck = true;
-        bit_board possibleAttackOrigins = board->whiteToMove ? (board->friendlyKingPos >> 7) | (board->friendlyKingPos >> 9) : (board->friendlyKingPos << 7) | (board->friendlyKingPos << 9);
+        bitboard possibleAttackOrigins = board->whiteToMove ? (board->friendlyKingPos >> 7) | (board->friendlyKingPos >> 9) : (board->friendlyKingPos << 7) | (board->friendlyKingPos << 9);
         board->checkRay |= (board->pawns & board->enemyPieces) & possibleAttackOrigins;
     }
 
-    bit_board opponentKingAttacks = possibleKingMoves[board->opponentKingPos];
+    bitboard opponentKingAttacks = possibleKingMoves[board->opponentKingPos];
 
     board->opponentControlledSquares = opponentKnightAttacks | opponentSlidingPieceAttacks | opponentKingAttacks | pawnAttacks;
     // Add the king back at the end
@@ -368,6 +392,15 @@ void init(Board* board) {
     board->opponentControlledSquares = 0ULL;
     board->emptySquares = ~(board->whitePieces | board->blackPieces);
     board->allPieces = board->blackPieces | board->whitePieces;
+
+    board->movesBitboard = 0ULL;
+    board->pawnMoves = 0ULL;
+    board->knightMoves = 0ULL;
+    board->bishopMoves = 0ULL;
+    board->rookMoves = 0ULL;
+    board->queenMoves = 0ULL;
+    board->kingMoves = 0ULL;
+
     calculateAttackData(board);
 }
 
@@ -386,12 +419,13 @@ std::vector<Move> calculateLegalMoves(Board* board) {
         moves.insert(moves.end(), knightMoves.begin(), knightMoves.end());
         moves.insert(moves.end(), sliderMoves.begin(), sliderMoves.end());
 
-        for (Move move : pawnMoves) {
+        /*for (Move move : pawnMoves) {
             if ((move & flagMask) << 12 == PromoteToQueenFlag) {
                 std::cout << "PROMOTE" << std::endl;
             }
-        }
+        }*/
     }
+    board->movesBitboard = board->pawnMoves | board->knightMoves | board->bishopMoves | board->rookMoves | board->queenMoves | board->kingMoves;
     if (moves.empty()) {
         //std::cout << "checkmate" << std::endl;
         if (board->inCheck) {

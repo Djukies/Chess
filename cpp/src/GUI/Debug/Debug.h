@@ -31,7 +31,7 @@ public:
     std::string fen;
     void debugAll();
     void moveGenTest(int depth);
-    std::vector<bit_board> bitBoards = {};
+    std::vector<bitboard> bitBoards = {};
 };
 
 

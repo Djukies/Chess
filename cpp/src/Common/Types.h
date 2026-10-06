@@ -6,7 +6,7 @@
 #include <vector>
 #include <map>
 
-#define bit_board uint_fast64_t
+#define bitboard uint_fast64_t
 #define Move uint16_t
 #define integer uint8_t
 #define TEAMWHITE true
@@ -76,29 +76,36 @@ struct MadeMove {
 };
 
 struct Board {
-    bit_board whitePieces = 0ULL;
-    bit_board blackPieces = 0ULL;
-    bit_board pawns = 0ULL;
-    bit_board knights = 0ULL;
-    bit_board bishops = 0ULL;
-    bit_board rooks = 0ULL;
-    bit_board queens = 0ULL;
-    bit_board kings = 0ULL;
-    bit_board allPieces = 0ULL;
-    bit_board friendlyPieces = 0ULL;
-    bit_board emptySquares = 0ULL;
-    bit_board enemyPieces = 0ULL;
+    bitboard whitePieces = 0ULL;
+    bitboard blackPieces = 0ULL;
+    bitboard pawns = 0ULL;
+    bitboard knights = 0ULL;
+    bitboard bishops = 0ULL;
+    bitboard rooks = 0ULL;
+    bitboard queens = 0ULL;
+    bitboard kings = 0ULL;
+    bitboard allPieces = 0ULL;
+    bitboard friendlyPieces = 0ULL;
+    bitboard emptySquares = 0ULL;
+    bitboard enemyPieces = 0ULL;
     integer blackKingPos = 0;
     integer whiteKingPos = 0;
     integer friendlyKingPos = 0;
     integer opponentKingPos = 0;
-    bit_board pinnedPieces = 0ULL;
-    bit_board checkRay = 0ULL;
+    bitboard pinnedPieces = 0ULL;
+    bitboard checkRay = 0ULL;
     bool inDoubleCheck = false;
     bool inCheck = false;
-    bit_board opponentControlledSquares = 0ULL;
+    bitboard opponentControlledSquares = 0ULL;
     std::vector<Move> movesVector = {};
     std::map<integer, std::vector<Move>> movesMap = {};
+    bitboard movesBitboard = 0ULL;
+    bitboard pawnMoves = 0ULL;
+    bitboard knightMoves = 0ULL;
+    bitboard bishopMoves = 0ULL;
+    bitboard rookMoves = 0ULL;
+    bitboard queenMoves = 0ULL;
+    bitboard kingMoves = 0ULL;
     uint8_t castleRights = 0;
     integer enPassantSquare = 0; // First bit says if enPassant is possible
     int halfMoves = 0;

@@ -7,9 +7,9 @@
 
 inline integer distanceToEdge[64][8];
 inline int directions[8] = {-8, 8, -1, 1, -9, 9, -7, 7};
-inline bit_board possibleKingMoves[64];
-inline bit_board possibleKnightMoves[64];
-inline bit_board rays[64][8];
+inline bitboard possibleKingMoves[64];
+inline bitboard possibleKnightMoves[64];
+inline bitboard rays[64][8];
 
 // Function to compute values
 inline void computeDistanceToEdge() {
@@ -35,14 +35,14 @@ inline void computeKingMoves() {
         int x = intToX(pos);
         int y = intToY(pos);
 
-        bit_board kingY = (uint64_t )0xFF << (y*8);
-        bit_board kingX = 0x0101010101010101ULL << x;
+        bitboard kingY = (uint64_t )0xFF << (y*8);
+        bitboard kingX = 0x0101010101010101ULL << x;
 
-        bit_board kingYP1 = kingY << 8;
-        bit_board kingYM1 = kingY >> 8;
+        bitboard kingYP1 = kingY << 8;
+        bitboard kingYM1 = kingY >> 8;
 
-        bit_board kingXP1 = (kingX << 1) & notFileA;
-        bit_board kingXM1 = (kingX >> 1) & notFileH;
+        bitboard kingXP1 = (kingX << 1) & notFileA;
+        bitboard kingXM1 = (kingX >> 1) & notFileH;
 
         possibleKingMoves[pos] = (kingYM1|kingY|kingYP1) & (kingXM1|kingX|kingXP1) & ~(1ULL << pos);
     }
@@ -82,8 +82,8 @@ inline void precompute() {
     computeRays();
 }
 
-inline bit_board getRays(integer square1, integer square2) {
-   for (bit_board ray : rays[square1]) {
+inline bitboard getRays(integer square1, integer square2) {
+   for (bitboard ray : rays[square1]) {
        if (containsSquare(ray, square2)) {
            return ray;
        }

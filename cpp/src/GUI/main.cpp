@@ -22,11 +22,11 @@ int main() {
     SetTargetFPS(60);
     SetTraceLogLevel(LOG_ERROR);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(800, 800, "Chess 2-Player by Djukies");
+    InitWindow(1280, 720, "Chess 2-Player by Djukies");
     SetWindowMinSize(300, 300);
 
     // Set up the Board
-    std::string FEN = "2rqkbnr/pp1n2pp/8/N2p4/3R2P1/5P2/PPP2Q1P/1K1R4 b k - 0 24";//rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+    std::string FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";//rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
     Board* board = loadBoardFromFEN(FEN);
     board->algorithmWhite = true;
     board->algorithmBlack = true;
@@ -39,6 +39,7 @@ int main() {
     auto* ucigui = new UCIGUI();
     auto* renderer = new Renderer(board, gameLogic, /*uci*/nullptr);
     auto* debug = new Debug(renderer, board, gameLogic);
+    renderer->FEN = FEN;
     debug->fen = FEN;
     gameLogic->algoWhiteStockfish = false;
     gameLogic->algoBlackStockfish = false;
@@ -67,7 +68,7 @@ int main() {
         gameLogic->undoMoves(board);
 
         std::string line = engine.readLine();
-        if (line != "") {
+        if (!line.empty()) {
             std::cout << "Engine sent: " << line;
             ucigui->checkForCommands(line);
         }
