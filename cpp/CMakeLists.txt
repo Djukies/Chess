@@ -8,10 +8,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_compile_options(-g -O0 -Wall -Wextra -Wpedantic)
 
 # ==========================================
-# Raylib (GUI only)
+# Raylib (GUI only) and RayGUI
 # ==========================================
 add_subdirectory(libs/raylib)
-include_directories(libs/raylib/src)
+include_directories(libs/raylib/src libs/raygui/src)
 
 # ==========================================
 # Helper: collect source files recursively
