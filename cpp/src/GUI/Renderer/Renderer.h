@@ -7,6 +7,8 @@
 #include "cmath"
 #include "../../Engine/Algorithm/UCI/UCI.h"
 
+#include "gui_chessgame.h"
+
 struct BitboardEntry {
     std::string name;
     bool visualised = false;
@@ -105,6 +107,7 @@ private:
     bool holdingPiece = false;
     Texture textureActivePiece = MISSING_TEXTURE;
 
+    GuiChessgameState state = InitGuiChessgame();
 
 
 public:

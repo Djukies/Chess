@@ -2,6 +2,7 @@
 #include <iostream>
 #include "Renderer.h"
 
+
 Renderer::Renderer(Board* board, GameLogic* gameLogic, UCI* uci) : board(board), gameLogic(gameLogic), uci(uci) {
     SetTextureFilter(basicFont.texture, TEXTURE_FILTER_BILINEAR);
     BitboardEntry whitepieces = {"White Pieces", false, &board->whitePieces};
@@ -179,9 +180,14 @@ void Renderer::drawBitboardMenu() {
 }
 
 void Renderer::drawMenu() {
-    drawMenuTabs();
+    //drawMenuTabs();
+    GuiChessgame(&state);
+    //DrawRectangleRec(menuUsableRec, MENUPRIMARYCOLOR);
 
-    DrawRectangleRec(menuUsableRec, MENUPRIMARYCOLOR);
+    // GuiToggleGroup(layoutRecs[0], "Game;Debug;BitBoards", &ToggleGroupMenuBarActive);
+    // GuiPanel(layoutRecs[1], NULL);
+    // if (GuiTextBox(layoutRecs[2], TextBoxFENDefText, 128, TextBoxFENDefEditMode)) TextBoxFENDefEditMode = !TextBoxFENDefEditMode;
+    // if (GuiTextBox(layoutRecs[3], TextBoxFENText, 128, TextBoxFENEditMode)) TextBoxFENEditMode = !TextBoxFENEditMode;
 }
 
 void Renderer::drawMenuTab(const int tabIndex, const Color color) const {

@@ -52,7 +52,8 @@ add_executable(chess_gui
         ${GUI_HDR}
         ${COMMON_SRC}
         ${COMMON_HDR}
-#        ${ENGINE_SRC}
+        src/GUI/Renderer/GuiChessgame.cpp
+        #        ${ENGINE_SRC}
 #        ${ENGINE_HDR}
 )
 
