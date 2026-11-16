@@ -181,7 +181,11 @@ void Renderer::drawBitboardMenu() {
 
 void Renderer::drawMenu() {
     //drawMenuTabs();
-    GuiChessgame(&state);
+    std::vector<std::string> moves = {};
+    for (Move move : board->movesMade) {
+        moves.push_back(moveToString(move));
+    }
+    GuiChessgame(&state, moves);
     //DrawRectangleRec(menuUsableRec, MENUPRIMARYCOLOR);
 
     // GuiToggleGroup(layoutRecs[0], "Game;Debug;BitBoards", &ToggleGroupMenuBarActive);
