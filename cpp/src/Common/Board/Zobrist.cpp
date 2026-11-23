@@ -29,7 +29,7 @@ uint64_t computeHash(Board* board) {
 
     // For each piece on board (example)
     for (int sq = 0; sq < 64; ++sq) {
-        int piece = getPiece(board, sq) + (containsSquare(board->whitePieces, sq) ? 0 : 5); // e.g. 0-11 or -1 if empty
+        int piece = getPieceType(board, sq) + (containsSquare(board->whitePieces, sq) ? 0 : 5); // e.g. 0-11 or -1 if empty
         if (piece != 12)
             hash ^= Zobrist::pieceSquare[piece][sq];
     }

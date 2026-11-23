@@ -6,7 +6,7 @@
 #include "../../Common/BitboardUtility/BitboardUtility.h"
 #include "cmath"
 #include "../../Engine/Algorithm/UCI/UCI.h"
-
+#include "GameRenderer/GameRenderer.h"
 #include "gui_chessgame.h"
 
 struct BitboardEntry {
@@ -100,6 +100,7 @@ private:
     Board* board;
     GameLogic* gameLogic;
     UCI* uci;
+    GameRenderer* gameRenderer;
 
     integer activePiece = 0;
     int selectedMenu = GAME_MENU;

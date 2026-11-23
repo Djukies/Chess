@@ -36,23 +36,23 @@ const bitboard downSide = ~upSide;
 const bitboard notRank12 = ~(rank1 | rank2);
 const bitboard notRank78 = ~(rank7 | rank8);
 
-inline bitboard shift(bitboard bitboard, int amount) {
+inline bitboard shift(bitboard bit_board, int amount) {
     if (amount > 0) {
-        return bitboard << amount;
+        return bit_board << amount;
     }
-    return bitboard >> -amount;
+    return bit_board >> -amount;
 }
 
-inline int getIndex(bitboard bitboard) {
-    return __builtin_ctzll(bitboard);
+inline int getIndex(bitboard bit_board) {
+    return __builtin_ctzll(bit_board);
 }
 
-inline bool containsSquare(bitboard bitboard, integer square)
+inline bool containsSquare(bitboard bit_board, integer square)
 {
-    return ((bitboard >> square) & 1) != 0;
+    return ((bit_board >> square) & 1) != 0;
 }
 
-inline Piece getPiece(Board* board, integer square) {
+inline Piece getPieceType(Board* board, integer square) {
     if (containsSquare(board->pawns, square)) return PAWN;
     if (containsSquare(board->bishops, square)) return BISHOP;
     if (containsSquare(board->knights, square)) return KNIGHT;
@@ -62,5 +62,9 @@ inline Piece getPiece(Board* board, integer square) {
     return NONE;
 }
 
+inline bool getPieceColor(Board* board, integer square) {
+    if (containsSquare(board->whitePieces, square)) return true;
+    return false;
+}
 
 #endif //CHESS_BITBOARDUTILITY_H

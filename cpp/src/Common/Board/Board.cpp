@@ -93,7 +93,7 @@ void addToBitboards(Board* board, integer pos, Piece pieceType, bool team) {
 void promoteHelp(Board* board, MadeMove* made_move, integer startSquare, integer targetSquare) {
     if (containsSquare(board->blackPieces | board->whitePieces, targetSquare)) {
         made_move->captured = true;
-        made_move->capturedPieceType = getPiece(board, targetSquare);
+        made_move->capturedPieceType = getPieceType(board, targetSquare);
         made_move->capturePosPlace = targetSquare;
         removeFromBitboards(board, targetSquare);
     }
@@ -111,7 +111,7 @@ MadeMove makeMove(Board* board, Move move) {
     MadeMove madeMove;
     madeMove.prevEnPassant = board->enPassantSquare;
     board->enPassantSquare = 0;
-    int piece = getPiece(board, startSquare) + (containsSquare(startSquare, board->whitePieces) ? 0 : 6);
+    int piece = getPieceType(board, startSquare) + (containsSquare(startSquare, board->whitePieces) ? 0 : 6);
     board->zobristKey ^= Zobrist::pieceSquare[piece][startSquare];
     madeMove.prevCastleRights = board->castleRights;
     if (board->whiteToMove && (targetSquare == 56 || startSquare == 56)) {board->castleRights &= ~0b00000010ULL;}
@@ -124,7 +124,7 @@ MadeMove makeMove(Board* board, Move move) {
         case NoFlag:
             if (containsSquare(board->blackPieces | board->whitePieces, targetSquare)) {
                 madeMove.captured = true;
-                madeMove.capturedPieceType = getPiece(board, targetSquare);
+                madeMove.capturedPieceType = getPieceType(board, targetSquare);
                 madeMove.capturePosPlace = targetSquare;
                 removeFromBitboards(board, targetSquare);
             }
