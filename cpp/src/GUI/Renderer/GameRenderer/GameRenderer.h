@@ -29,8 +29,7 @@ class GameRenderer {
     const Texture BLACK_KING = LoadTexture("../Assets/Pieces/black_king.png");
 
     Board* board;
-    Vector2 position;
-    Vector2 size;
+
     float squareSize;
 
 
@@ -38,11 +37,13 @@ class GameRenderer {
     void drawSquares() const;
     void drawPieces();
 
-    void drawMove(uint8_t pos, bool isCapture, bool isMouseHoveringMove) const;
+    void drawDraggedPiece();
 
-    void drawMoves();
+    void drawMove(integer pos, bool isCapture, bool isMouseHoveringMove) const;
 
-    void drawCastleMoves(uint8_t pos);
+    void drawMoves(integer piece);
+
+    void drawCastleMoves(integer pos);
 
     Texture getTexture(Piece pieceType, bool pieceColor);
 
@@ -50,8 +51,12 @@ public:
     GameRenderer(Board* board, Vector2 position, Vector2 size);
     ~GameRenderer();
 
-    bool pieceActive = false;
+    Vector2 position;
+    Vector2 size;
+
+    bool isPieceActive = false;
     integer activePiece = 0;
+    bool isDraggingPiece = false;
 
     void renderBoard();
 

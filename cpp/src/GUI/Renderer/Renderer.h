@@ -8,6 +8,7 @@
 #include "../../Engine/Algorithm/UCI/UCI.h"
 #include "GameRenderer/GameRenderer.h"
 #include "gui_chessgame.h"
+#include "Menu/MenuRenderer/MenuRenderer.h"
 
 struct BitboardEntry {
     std::string name;
@@ -15,12 +16,6 @@ struct BitboardEntry {
     bitboard* board = nullptr;
 };
 
-enum menuOptions {
-    GAME_MENU,
-    DEBUG_MENU,
-    BITBOARD_MENU,
-    menuOptionsCount
-};
 
 class Renderer {
 private:
@@ -101,6 +96,7 @@ private:
     GameLogic* gameLogic;
     UCI* uci;
     GameRenderer* gameRenderer;
+    MenuRenderer* menuRenderer;
 
     integer activePiece = 0;
     int selectedMenu = GAME_MENU;

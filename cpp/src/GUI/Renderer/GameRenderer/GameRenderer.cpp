@@ -21,7 +21,12 @@ void GameRenderer::updateBoardSize(Vector2 newSize) {
 
 void GameRenderer::renderBoard() {
     drawSquares();
-    if (pieceActive) drawMoves();
+    if (isPieceActive) {
+        if (containsSquare(board->friendlyPieces, activePiece)) { // Only draw moves when it is your own piece
+            drawMoves(activePiece); // Draw the possible moves of the active piece
+        }
+        DrawRectangleV(intToVector2ScreenPos(activePiece, squareSize), {squareSize, squareSize}, ACTIVEPIECECOLOR); // Draw square to make visible which piece is active
+    }
     drawPieces();
 }
 
@@ -60,17 +65,16 @@ Texture GameRenderer::getTexture(Piece pieceType, bool pieceColor) {
 }
 
 void GameRenderer::drawPieces() {
-    float scale = squareSize/TEXTURE_SIZE;
+    const float scale = squareSize/TEXTURE_SIZE;
 
     bitboard pieces = board->whitePieces | board->blackPieces; // Get all Pieces
     while (pieces) {    // Loop through all pieces
         int i = __builtin_ctzll(pieces); // Find index of the least significant set bit
-        /*if (holdingPiece && i == activePiece) { // if mouse is holding the piece
+        if (isDraggingPiece && activePiece == i) { // if mouse is dragging the piece
+            drawDraggedPiece();
             pieces &= pieces - 1; // Remove the least significant set bit
             continue;
-        }*/
-        Piece piece = getPieceType(board, i);
-        bool pieceColor = getPieceColor(board, i);
+        }
         const Texture texture = getTexture(getPieceType(board, i), getPieceColor(board, i));
 
         DrawTextureEx(texture, {position.x + intToX(i) * squareSize, position.y + intToY(i) * squareSize}, 0, scale, WHITE); // Draw the texture at right scale and position
@@ -78,12 +82,20 @@ void GameRenderer::drawPieces() {
     }
 }
 
-void GameRenderer::drawMoves() {
+void GameRenderer::drawDraggedPiece() {
+    const Texture texture = getTexture(getPieceType(board, activePiece), getPieceColor(board, activePiece));
+    const float scale = squareSize/TEXTURE_SIZE;
 
-    if (!containsSquare(board->friendlyPieces, activePiece)) {
-        return; // If active piece is not own piece, no moves should be drawn
-    }
-    for (Move move : board->movesMap[activePiece]) { // Loop through all moves of active piece
+    DrawTextureEx(  texture,
+                    {GetMousePosition().x - squareSize/2, GetMousePosition().y - squareSize/2},
+                    0,
+                    scale * 1.03f,
+                    WHITE);
+}
+
+
+void GameRenderer::drawMoves(integer piece) {
+    for (Move move : board->movesMap[piece]) { // Loop through all moves of piece
         int newPos = getTargetsquare(move);
         if (getFlag(move) > PromoteToQueenFlag) {
             continue; // Prevent all the other promotions except queen promotion from drawing to avoid duplicate drawings

@@ -5,6 +5,7 @@
 
 Renderer::Renderer(Board* board, GameLogic* gameLogic, UCI* uci) : board(board), gameLogic(gameLogic), uci(uci) {
     gameRenderer = new GameRenderer(board, {0, 0}, {720, 720});
+    menuRenderer = new MenuRenderer({720, 0}, {(float)GetScreenWidth()-720, 720});
 
     SetTextureFilter(basicFont.texture, TEXTURE_FILTER_BILINEAR);
     BitboardEntry whitepieces = {"White Pieces", false, &board->whitePieces};
@@ -31,8 +32,9 @@ void Renderer::render() {
     ClearBackground(MENUSECONDARYCOLOR);
     squareSize = std::min(GetScreenHeight(), GetScreenWidth()) / 8;
 
-    gameRenderer->renderBoard(); // Render all board aspects (squares + pieces + moves etc.)
 
+    this->checkInput();
+    /*
     //this->drawBoard();
     this->drawFEN();
     this->drawMenu();
@@ -40,10 +42,10 @@ void Renderer::render() {
     /*if (pieceActive) {
         this->drawMoves();
         DrawRectangleV(intToVector2ScreenPos(activePiece, squareSize), {(float)squareSize, (float)squareSize}, ACTIVEPIECECOLOR);
-    }*/
+    }#1#
     //this->drawPieces();
 
-    this->checkInput();
+
     bitboard colorpiecesToDraw = 0ULL;
     for (int i = 0; i < 2; i++) {
         if (bitboards.at(i).visualised) {
@@ -69,6 +71,10 @@ void Renderer::render() {
     if ((colorpiecesToDraw & piecesToDraw) | attackSquares | movesToDraw != 0) {
         this->drawBitBoard((colorpiecesToDraw & piecesToDraw) | attackSquares | movesToDraw);
     }
+    */
+
+    menuRenderer->renderMenu();
+    gameRenderer->renderBoard(); // Render all board aspects (squares + pieces + moves etc.)
 
 }
 
@@ -118,18 +124,6 @@ void Renderer::drawMenuTab(const int tabIndex, const Color color) const {
 
 }
 
-void Renderer::drawMenuTabsHover() {
-    // Check if mouse is hovering over the top bar
-    if (CheckCollisionPointRec(GetMousePosition(), menuTopBarRec)) {
-        // Get relativeMouseX and calculate which menu buttons is being hovered
-        const float relativeMouseX = GetMousePosition().x - menuTopBarRec.x;
-        const int mouseSquare = std::floor(relativeMouseX / menuTopBarSquareSize.x);
-        if (mouseSquare >=  menuOptionsCount) {
-            return;
-        }
-        drawMenuTab(mouseSquare, MENUHOVERCOLOR);
-    }
-}
 
 void Renderer::drawMenuTabsIcons() {
     DrawTextureEx(GAMEMENUTEXTURE, {.x = menuTopBarRec.x + (menuTopBarSquareSize.x*0), .y = menuTopBarRec.y}, 0, menuTopBarSquareSize.y/(float)GAMEMENUTEXTURE.height, WHITE);
@@ -138,9 +132,9 @@ void Renderer::drawMenuTabsIcons() {
 }
 
 void Renderer::drawMenuTabs() {
-    drawMenuTabsHover(); // Draw the menu tab the mouse is hovering over
-    drawMenuTab(selectedMenu, MENUPRIMARYCOLOR); // Draw the menu tab currently selected
-    drawMenuTabsIcons();
+    //drawMenuTabsHover(); // Draw the menu tab the mouse is hovering over
+    //drawMenuTab(selectedMenu, MENUPRIMARYCOLOR); // Draw the menu tab currently selected
+    //drawMenuTabsIcons();
 }
 
 void Renderer::drawMouseToolTip(std::string text) {
@@ -184,7 +178,7 @@ void Renderer::checkInput() {
 }
 
 void Renderer::onClick() {
-    if (GetMousePosition().x <= squareSize * 8 && GetMousePosition().y <= squareSize * 8) {
+    if (CheckCollisionPointRec(GetMousePosition(), {gameRenderer->position.x, gameRenderer->position.y, gameRenderer->size.x, gameRenderer->size.y})) {
         onBoardClicked();
     }
     if (GetMousePosition().y >= 0 && GetMousePosition().y < (float)squareSize*0.75f
@@ -203,24 +197,25 @@ void Renderer::onBoardClicked() {
     // Create Variable and bitboard mask for the clicked Square
     integer clickedSquare = vector2ScreenToInt(GetMousePosition(), squareSize);
     bitboard clickMask = 1ULL << clickedSquare;
+    std::cout << "hey papi" << std::endl;
     // Check if there already is an active piece
-    if (gameRenderer->pieceActive) {
-        gameRenderer->pieceActive = false;
+    if (gameRenderer->isPieceActive) {
+        gameRenderer->isPieceActive = false;
         if (!tryMove(board, gameRenderer->activePiece, clickedSquare)) { // Check if you can make a Move to the clicked square (if not do next code (also you can't if it is its own square))
             if (clickMask & (board->whitePieces | board->blackPieces)) { // If clicked on a piece (not air)
                 gameRenderer->activePiece = clickedSquare;
-                gameRenderer->pieceActive = true;
+                gameRenderer->isPieceActive = true;
             }
         }
     } else {
         if (clickMask & (board->whitePieces | board->blackPieces)) { // If clicked on a piece (not air) Make active piece clicked Square
-            gameRenderer->pieceActive = true;
+            gameRenderer->isPieceActive = true;
             gameRenderer->activePiece = clickedSquare;
         } else { // Else: No active Piece
-            gameRenderer->pieceActive = false;
+            gameRenderer->isPieceActive = false;
         }
     }
-    if (gameRenderer->pieceActive) { // Check if the there is now an active piece and assign the right texture
+    if (gameRenderer->isPieceActive) { // Check if the there is now an active piece and assign the right texture
         //textureActivePiece = getTexture(1ULL << gameRenderer->activePiece);
     }
 }
@@ -235,25 +230,25 @@ void Renderer::onBitboardMenuClicked() {
 }
 
 void Renderer::onMouseDown() {
-    if (gameRenderer->pieceActive) {
-        holdingPiece = true;
+    if (gameRenderer->isPieceActive) {
+        gameRenderer->isDraggingPiece = true;
         float scale = (float) squareSize / TEXTURE_SIZE;
         // Draw the piece at the mouse, with slightly bigger scale
-        DrawTextureEx(textureActivePiece,
+        /*DrawTextureEx(textureActivePiece,
                       {GetMousePosition().x - (float)squareSize/2, GetMousePosition().y - (float)squareSize/2}, 0,
-                      scale * 1.03f, WHITE);
+                      scale * 1.03f, WHITE);*/
         return;
     }
-    holdingPiece = false;
+    gameRenderer->isDraggingPiece = false;
 }
 
 void Renderer::onMouseReleased() {
     // Try to make the Move
     int newPos = vector2ScreenToInt(GetMousePosition(), squareSize);
-    if (gameRenderer->pieceActive) {
+    if (gameRenderer->isPieceActive) {
         tryMove(board, gameRenderer->activePiece, newPos);
     }
-    holdingPiece = false;
+    gameRenderer->isDraggingPiece = false;
 }
 
 void Renderer::updateScreenElementsRecs() {

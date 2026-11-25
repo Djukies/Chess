@@ -1,0 +1,9 @@
+#ifndef CHESS_SETTINGSMENURENDERER_H
+#define CHESS_SETTINGSMENURENDERER_H
+
+
+class SettingsMenuRenderer {
+};
+
+
+#endif //CHESS_SETTINGSMENURENDERER_H

@@ -86,10 +86,6 @@ int main() {
             renderer->render();
             // Debugs like showing bitboards
             debug->debugAll();
-            // RayGUI test
-            if (GuiButton((Rectangle){ 24, 24, 120, 30 }, "#191#Show Message")) {
-                std::cout << "BUTTON" << std::endl;
-            }
         EndDrawing();
 
     } CloseWindow();
